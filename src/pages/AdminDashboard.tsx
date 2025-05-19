@@ -315,13 +315,14 @@ const AdminDashboard = () => {
   // Intelligence characteristics are now imported from shared types
 
   return (
-    <div className="min-h-screen bg-gray-50 px-6">
-      <div className="container mx-auto p-4">
-        <div className="flex justify-between items-center mb-6">
+    <div className="min-h-screen bg-gray-50 px-2 sm:px-4 md:px-6">
+      <div className="container mx-auto p-2 md:p-4">
+        {/* Perbaikan header untuk responsivitas */}
+        <div className="flex flex-col gap-2 md:flex-row md:justify-between md:items-center mb-4 md:mb-6">
           <div>
-            <div className="flex items-center mb-1">
-              <h1 className="text-3xl font-bold text-purple-800 mr-3">Dashboard Admin</h1>
-              <div className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm font-medium">
+            <div className="flex flex-wrap items-center gap-2 mb-1">
+              <h1 className="text-2xl md:text-3xl font-bold text-purple-800">Dashboard Admin</h1>
+              <div className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs md:text-sm font-medium">
                 {greeting}
               </div>
             </div>
@@ -345,17 +346,17 @@ const AdminDashboard = () => {
               )}
             </div>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => setProfileModalOpen(true)}>
-              <User className="mr-2" />
+          <div className="flex gap-2 mt-2 md:mt-0">
+            <Button size="sm" className="text-xs md:text-sm" variant="outline" onClick={() => setProfileModalOpen(true)}>
+              <User className="h-4 w-4 mr-1 md:mr-2" />
               Profil
             </Button>
-            <Button variant="outline" onClick={handleLogout}>Keluar</Button>
+            <Button size="sm" className="text-xs md:text-sm" variant="outline" onClick={handleLogout}>Keluar</Button>
           </div>
         </div>
 
-        {/* Quick Stats Section */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+        {/* Quick Stats Section - juga diperbaiki untuk lebih responsif */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 md:gap-4 mb-4 md:mb-6">
           <Card>
             <CardContent className="p-6">
               <div className="text-2xl font-bold">{testResults.length}</div>
@@ -391,19 +392,6 @@ const AdminDashboard = () => {
               <p className="text-xs text-muted-foreground">Rata-rata Usia</p>
             </CardContent>
           </Card>
-
-          {/* <Card>
-          <CardContent className="p-6">
-            <div className="text-2xl font-bold">
-              {testResults
-                .filter(result => result.gender === 'Female' || result.gender === 'Perempuan')
-                .length}:{testResults
-                  .filter(result => result.gender === 'Male' || result.gender === 'Laki-laki')
-                  .length}
-            </div>
-            <p className="text-xs text-muted-foreground">Rasio P:L</p>
-          </CardContent>
-        </Card> */}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">          {/* Chart 1: Average Intelligence Scores */}
