@@ -47,11 +47,6 @@ const Index = () => {
         className="w-full max-w-6xl mx-auto mt-10 mb-6 px-6 py-4 bg-white bg-opacity-70 backdrop-blur-lg rounded-xl shadow-lg"
       >
         <div className="flex items-center justify-center">
-          <div className="mr-4 bg-purple-600 rounded-full p-3 shadow-md">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="white" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-            </svg>
-          </div>
           <div className="text-center md:text-left">
             <h1 className="text-4xl font-bold mb-1 text-purple-800 md:text-5xl">Tes Kecerdasan Majemuk</h1>
             <p className="text-lg text-gray-700 max-w-2xl">
