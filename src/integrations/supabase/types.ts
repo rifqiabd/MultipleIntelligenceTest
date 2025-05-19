@@ -15,7 +15,6 @@ export type Database = {
           name: string
           age: number
           gender: string
-          email: string
           student_class: string
           date: string
           results: {
@@ -35,7 +34,6 @@ export type Database = {
           name: string
           age: number
           gender: string
-          email: string
           student_class: string
           date?: string
           results: {
@@ -55,7 +53,6 @@ export type Database = {
           name?: string
           age?: number
           gender?: string
-          email?: string
           student_class?: string
           date?: string
           results?: {

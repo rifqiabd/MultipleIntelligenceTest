@@ -33,7 +33,6 @@ const mockTestResults: TestResult[] = [
     name: "Jane Smith",
     age: 35,
     gender: "Female",
-    email: "jane@example.com",
     studentClass: "Engineer",
     date: "2025-05-12",
     results: {
@@ -53,7 +52,6 @@ const mockTestResults: TestResult[] = [
     name: "Alex Johnson",
     age: 22,
     gender: "Non-binary",
-    email: "alex@example.com",
     studentClass: "Musician",
     date: "2025-05-14",
     results: {
@@ -575,7 +573,7 @@ const AdminDashboard = () => {
                 size="sm"
                 onClick={() => {
                   // Create CSV data
-                  const headers = ['Nama', 'Kelas', 'Tanggal', 'Usia', 'Gender', 'Email', 'Linguistik', 'Logis', 'Musikal', 'Kinestetik', 'Spasial', 'Interpersonal', 'Intrapersonal', 'Naturalis', 'Tipe Dominan'];
+                  const headers = ['Nama', 'Kelas', 'Tanggal', 'Usia', 'Gender', 'Linguistik', 'Logis', 'Musikal', 'Kinestetik', 'Spasial', 'Interpersonal', 'Intrapersonal', 'Naturalis', 'Tipe Dominan'];
 
                   const csvRows = [headers.join(',')];
                   testResults.forEach(result => {
@@ -585,7 +583,6 @@ const AdminDashboard = () => {
                       `"${new Date(result.date).toLocaleDateString('id-ID')}"`,
                       result.age,
                       `"${result.gender}"`,
-                      `"${result.email}"`,
                       result.results.linguistic,
                       result.results.logical,
                       result.results.musical,
@@ -629,7 +626,7 @@ const AdminDashboard = () => {
                 size="sm"
                 onClick={() => {
                   // Prepare data for XLSX export
-                  const headers = ['Nama', 'Kelas', 'Tanggal', 'Usia', 'Gender', 'Email', 'Linguistik', 'Logis', 'Musikal', 'Kinestetik', 'Spasial', 'Interpersonal', 'Intrapersonal', 'Naturalis', 'Tipe Dominan'];
+                  const headers = ['Nama', 'Kelas', 'Tanggal', 'Usia', 'Gender', 'Linguistik', 'Logis', 'Musikal', 'Kinestetik', 'Spasial', 'Interpersonal', 'Intrapersonal', 'Naturalis', 'Tipe Dominan'];
 
                   const data = testResults.map(result => [
                     result.name,
@@ -637,7 +634,6 @@ const AdminDashboard = () => {
                     new Date(result.date).toLocaleDateString('id-ID'),
                     result.age,
                     result.gender,
-                    result.email,
                     result.results.linguistic,
                     result.results.logical,
                     result.results.musical,
@@ -921,10 +917,6 @@ const AdminDashboard = () => {
                     <div>
                       <p className="text-sm text-gray-500">Jenis Kelamin:</p>
                       <p className="font-medium">{selectedResult.gender}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Email:</p>
-                      <p className="font-medium">{selectedResult.email}</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">Kelas:</p>

@@ -6,7 +6,6 @@ export type TestResult = {
   name: string;
   age: number;
   gender: string;
-  email: string;
   studentClass: string;
   date: string;
   results: Record<IntelligenceType, number>;

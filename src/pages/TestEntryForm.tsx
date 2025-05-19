@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,13 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 
 export type UserData = {
   name: string;
   age: number;
   gender: string;
-  email: string;
   studentClass: string;
 };
 
@@ -21,9 +20,13 @@ const TestEntryForm = () => {
     name: "",
     age: 0,
     gender: "",
-    email: "",
     studentClass: "",
   });
+  
+  // Daftar kelas yang tersedia
+  const availableClasses = [
+    "VII"," VIII", "IX", "X", "XI", "XII", "Lainnya"
+  ];
   
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -42,11 +45,19 @@ const TestEntryForm = () => {
       gender: value,
     });
   };
+  
+  // Tambahkan handler untuk dropdown kelas
+  const handleClassChange = (value: string) => {
+    setUserData({
+      ...userData,
+      studentClass: value,
+    });
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
       // Validation
-    if (!userData.name || userData.age <= 0 || !userData.gender || !userData.email || !userData.studentClass) {
+    if (!userData.name || userData.age <= 0 || !userData.gender || !userData.studentClass) {
       toast({
         title: "Formulir Tidak Lengkap",
         description: "Mohon isi semua kolom yang diperlukan",
@@ -121,26 +132,24 @@ const TestEntryForm = () => {
                 </div>
               </RadioGroup>
             </div>
-              <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input 
-                id="email"
-                name="email"
-                type="email"
-                value={userData.email}
-                onChange={handleChange}
-                required
-              />
-            </div>
-              <div className="space-y-2">
+            {/* Dropdown untuk memilih kelas */}
+            <div className="space-y-2">
               <Label htmlFor="studentClass">Kelas</Label>
-              <Input 
-                id="studentClass"
-                name="studentClass"
-                value={userData.studentClass}
-                onChange={handleChange}
-                required
-              />
+              <Select 
+                value={userData.studentClass} 
+                onValueChange={handleClassChange}
+              >
+                <SelectTrigger id="studentClass">
+                  <SelectValue placeholder="Pilih Kelas" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableClasses.map((className) => (
+                    <SelectItem key={className} value={className}>
+                      {className}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </CardContent>
           <CardFooter>

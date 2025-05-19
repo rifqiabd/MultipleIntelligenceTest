@@ -4,7 +4,6 @@ create table test_results (
   name text not null,
   age integer not null,
   gender text not null,
-  email text not null,
   student_class text not null,
   date timestamp with time zone default now(),
   results jsonb not null,

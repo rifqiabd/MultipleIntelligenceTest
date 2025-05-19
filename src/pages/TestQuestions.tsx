@@ -240,7 +240,6 @@ const TestQuestions = () => {
       name: userData.name,
       age: userData.age,
       gender: userData.gender,
-      email: userData.email,
       studentClass: userData.studentClass,
       date: new Date().toISOString(),
       results: percentageScores as Record<IntelligenceType, number>,

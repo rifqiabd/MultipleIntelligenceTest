@@ -197,10 +197,7 @@ const TestResults = () => {
                     <p className="text-sm text-gray-500">Jenis Kelamin:</p>
                     <p className="font-medium">{result.gender}</p>
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Email:</p>
-                    <p className="font-medium">{result.email}</p>
-                  </div>
+
                   <div>
                     <p className="text-sm text-gray-500">Kelas:</p>
                     <p className="font-medium">{result.studentClass}</p>
