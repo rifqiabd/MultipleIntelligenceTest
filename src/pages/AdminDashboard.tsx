@@ -21,6 +21,8 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { intelligenceTypes, intelligenceDescriptions, IntelligenceType } from "@/data/testQuestions";
 
+// cek perubahan
+
 // Register ChartJS components
 ChartJS.register(
   RadialLinearScale,
