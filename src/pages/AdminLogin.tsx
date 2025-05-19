@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { signInWithEmail } from "@/integrations/supabase/auth";
+import { ArrowLeft } from "lucide-react";
 
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
@@ -14,6 +15,15 @@ const AdminLogin = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  
+  // Periksa status login saat komponen dimuat
+  useEffect(() => {
+    const isLoggedIn = localStorage.getItem("isAdminLoggedIn") === "true";
+    if (isLoggedIn) {
+      // Jika sudah login, langsung redirect ke dashboard
+      navigate("/admin/dashboard");
+    }
+  }, [navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,16 +45,30 @@ const AdminLogin = () => {
     }
     
     setIsLoading(false);
+  };  const handleBackToHome = () => {
+    navigate("/");
   };
+  
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
+          <div className="flex justify-between items-center">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleBackToHome}
+              className="mb-2"
+            >
+              <ArrowLeft className="h-4 w-4 mr-1" /> 
+              Kembali ke Beranda
+            </Button>
+          </div>
           <CardTitle className="text-2xl text-center">Login Admin</CardTitle>
           <CardDescription className="text-center">
             Silakan login untuk mengakses dashboard admin
           </CardDescription>
-        </CardHeader>        <form onSubmit={handleLogin}>          <CardContent className="space-y-4">
+        </CardHeader><form onSubmit={handleLogin}>          <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input 
@@ -65,9 +89,14 @@ const AdminLogin = () => {
                 required
               />
             </div>
-          </CardContent>
-          <CardFooter>
-            <Button type="submit" className="w-full">Login</Button>
+          </CardContent>          <CardFooter className="flex flex-col gap-4">
+            <Button 
+              type="submit" 
+              className="w-full"
+              disabled={isLoading}
+            >
+              {isLoading ? "Memproses..." : "Login"}
+            </Button>
           </CardFooter>
         </form>
       </Card>
