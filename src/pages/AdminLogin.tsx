@@ -23,29 +23,26 @@ const AdminLogin = () => {
     if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
       // Store admin login state in localStorage
       localStorage.setItem("isAdminLoggedIn", "true");
-      navigate("/admin/dashboard");
-    } else {
+      navigate("/admin/dashboard");    } else {
       toast({
-        title: "Login Failed",
-        description: "Invalid username or password",
+        title: "Login Gagal",
+        description: "Username atau password tidak valid",
         variant: "destructive",
       });
     }
   };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl text-center">Admin Login</CardTitle>
+          <CardTitle className="text-2xl text-center">Login Admin</CardTitle>
           <CardDescription className="text-center">
-            Please login to access the admin dashboard
+            Silakan login untuk mengakses dashboard admin
           </CardDescription>
         </CardHeader>
-        <form onSubmit={handleLogin}>
-          <CardContent className="space-y-4">
+        <form onSubmit={handleLogin}>          <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="username">Nama Pengguna</Label>
               <Input 
                 id="username"
                 type="text"
@@ -55,7 +52,7 @@ const AdminLogin = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Kata Sandi</Label>
               <Input 
                 id="password"
                 type="password"

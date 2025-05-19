@@ -3,92 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Radar } from 'react-chartjs-2';
-import { 
-  Chart as ChartJS, 
-  RadialLinearScale, 
-  PointElement, 
-  LineElement, 
-  Filler, 
-  Tooltip, 
-  Legend 
-} from 'chart.js';
 import { intelligenceTypes, intelligenceDescriptions, IntelligenceType } from "@/data/testQuestions";
+import { intelligenceCharacteristics, TestResult } from "@/data/testResultsTypes";
+import { registerChartComponents } from "@/utils/chartConfig";
 import { PrinterIcon } from "lucide-react";
 
 // Register Chart.js components
-ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend);
-
-type TestResult = {
-  id: string;
-  name: string;
-  age: number;
-  gender: string;
-  email: string;
-  occupation: string;
-  date: string;
-  results: Record<IntelligenceType, number>;
-  dominantType: IntelligenceType;
-};
-
-// Intelligence characteristics for each type
-const intelligenceCharacteristics: Record<IntelligenceType, string[]> = {
-  linguistic: [
-    "Pintar bermain dengan kata-kata",
-    "Memiliki kosakata yang luas",
-    "Pandai bercerita dan menulis",
-    "Menikmati membaca dan berdiskusi",
-    "Berkomunikasi dengan jelas dan efektif"
-  ],
-  logical: [
-    "Mudah memahami pola dan konsep abstrak",
-    "Menyukai angka dan kalkulasi",
-    "Pemikir sistematis dan analitis",
-    "Senang memecahkan teka-teki",
-    "Pendekatan metodis dalam memecahkan masalah"
-  ],
-  musical: [
-    "Sensitif terhadap nada dan ritme",
-    "Mudah mengingat melodi",
-    "Sering mengekspresikan diri melalui musik",
-    "Dapat memainkan instrumen musik",
-    "Memiliki pemahaman yang baik tentang struktur musik"
-  ],
-  bodily: [
-    "Koordinasi fisik yang baik",
-    "Belajar lebih baik melalui gerakan dan pengalaman",
-    "Terampil dalam kerajinan tangan",
-    "Menggunakan bahasa tubuh saat berkomunikasi",
-    "Menikmati aktivitas fisik dan olahraga"
-  ],
-  spatial: [
-    "Kemampuan visualisasi yang kuat",
-    "Mudah membaca peta dan diagram",
-    "Memiliki orientasi ruang yang baik",
-    "Menikmati seni visual dan desain",
-    "Berpikir dalam gambar dan citra"
-  ],
-  interpersonal: [
-    "Mudah berempati dengan orang lain",
-    "Berkomunikasi dan bernegosiasi dengan baik",
-    "Dapat memotivasi dan mempengaruhi orang lain",
-    "Terampil dalam bekerja dalam tim",
-    "Membangun hubungan dengan mudah"
-  ],
-  intrapersonal: [
-    "Pemahaman diri yang mendalam",
-    "Reflektif dan introspektif",
-    "Kesadaran akan nilai dan tujuan pribadi",
-    "Mandiri dan disiplin diri",
-    "Peka terhadap perasaan dan emosi sendiri"
-  ],
-  naturalistic: [
-    "Hubungan yang kuat dengan dunia alam",
-    "Kemampuan mengidentifikasi flora dan fauna",
-    "Kesadaran akan pola-pola alam",
-    "Kepedulian terhadap lingkungan",
-    "Menikmati kegiatan di alam terbuka"
-  ]
-};
+registerChartComponents();
 
 const TestResults = () => {
   const [result, setResult] = useState<TestResult | null>(null);
@@ -212,8 +133,8 @@ const TestResults = () => {
                     <p className="font-medium">{result.email}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Pekerjaan:</p>
-                    <p className="font-medium">{result.occupation}</p>
+                    <p className="text-sm text-gray-500">Kelas:</p>
+                    <p className="font-medium">{result.studentClass}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Tanggal Tes:</p>
