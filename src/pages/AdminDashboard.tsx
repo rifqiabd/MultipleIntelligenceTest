@@ -234,10 +234,10 @@ const AdminDashboard = () => {
       localStorage.removeItem("isAdminLoggedIn");
       // Sign out from Supabase as well
       await signOut();
-      navigate("/admin");
+      navigate("/");
     } catch (error) {
       console.error("Error signing out:", error);
-      navigate("/admin");
+      navigate("/");
     }
   };
 
