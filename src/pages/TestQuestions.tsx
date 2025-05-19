@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -321,6 +320,7 @@ const TestQuestions = () => {
                             ? "bg-purple-100 border-purple-300 border"
                             : "bg-white border border-gray-200 hover:bg-gray-50"
                         }`}
+                        onClick={() => handleAnswer(value.toString())}
                       >
                         <RadioGroupItem 
                           value={value.toString()} 
