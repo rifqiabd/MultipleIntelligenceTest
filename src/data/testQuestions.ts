@@ -16,26 +16,35 @@ export type Question = {
 };
 
 export const intelligenceTypes: Record<IntelligenceType, string> = {
-  linguistic: "Linguistik",
-  logical: "Logis-Matematis",
-  musical: "Musikal",
-  bodily: "Kinestetik-Tubuh",
-  spatial: "Spasial",
-  interpersonal: "Interpersonal",
-  intrapersonal: "Intrapersonal",
-  naturalistic: "Naturalis"
+  linguistic: "🗣️ Linguistik",
+  logical: "🧠 Logis-Matematis",
+  musical: "🎵 Musikal",
+  bodily: "🤸‍♂️ Kinestetik-Tubuh",
+  spatial: "🧭 Spasial",
+  interpersonal: "🧑‍🤝‍🧑 Interpersonal",
+  intrapersonal: "🧘‍♂️ Intrapersonal",
+  naturalistic: "🌿 Naturalis"
 };
 
 export const intelligenceDescriptions: Record<IntelligenceType, string> = {
-  linguistic: "Kepekaan terhadap makna dan urutan kata. Keterampilan dalam membaca, menulis, bercerita, dan ekspresi verbal.",
-  logical: "Kemampuan untuk bekerja dengan angka, pola logis, dan penalaran. Keterampilan dalam pemecahan masalah, analisis, dan investigasi ilmiah.",
-  musical: "Kepekaan terhadap nada, melodi, ritme, dan tona. Keterampilan dalam pertunjukan musik, komposisi, dan apresiasi.",
-  bodily: "Pengendalian gerakan tubuh seseorang dan kapasitas untuk menangani objek dengan terampil. Keterampilan dalam aktivitas fisik, kerajinan, dan koordinasi.",
-  spatial: "Kapasitas untuk mempersepsikan dunia visual-spasial secara akurat. Keterampilan dalam visualisasi, desain artistik, dan penalaran spasial.",
-  interpersonal: "Kemampuan untuk memahami dan berinteraksi secara efektif dengan orang lain. Keterampilan dalam komunikasi, empati, dan membangun hubungan.",
-  intrapersonal: "Kapasitas untuk kesadaran diri dan pemahaman tentang perasaan sendiri. Keterampilan dalam refleksi, regulasi diri, dan pertumbuhan pribadi.",
-  naturalistic: "Kemampuan untuk mengenali dan mengkategorikan tumbuhan, hewan, dan fenomena alam. Keterampilan dalam mengamati, memahami, dan mengorganisir pola di alam."
+  linguistic: "Kamu hebat dalam bermain dengan kata! Menulis, membaca, bercerita, atau berdiskusi adalah duniamu. Kata-kata bisa jadi senjatamu untuk menginspirasi, meyakinkan, atau menyampaikan ide-ide luar biasa.",
+  
+  logical: "Kamu punya otak detektif! Suka angka, logika, dan teka-teki. Kamu jago menganalisis, mencari pola, dan menemukan solusi. Dunia jadi lebih masuk akal di tanganmu yang penuh rasa ingin tahu.",
+  
+  musical: "Nada dan irama mengalir alami dalam dirimu! Kamu punya kepekaan luar biasa terhadap musik—baik menciptakan, memainkan, atau hanya menikmati. Musik adalah bahasa keduamu!",
+  
+  bodily: "Kamu bergerak dengan percaya diri! Tubuhmu adalah alat ekspresi yang luar biasa—entah dalam olahraga, menari, atau membuat sesuatu dengan tanganmu. Aksi dan gerakan adalah cara kamu berkarya.",
+  
+  spatial: "Kamu melihat dunia lewat imajinasi visual yang tajam! Pandai menggambar, mendesain, atau membayangkan sesuatu dalam bentuk dan ruang. Kamu jago memvisualisasikan ide yang belum terlihat orang lain.",
+  
+  interpersonal: "Kamu ahli membaca suasana dan hati orang lain! Kamu tahu cara berbicara, mendengarkan, dan bekerja sama. Kamu pembawa damai, penyemangat tim, dan teman yang menyenangkan.",
+  
+  intrapersonal: "Kamu kenal banget dengan dirimu sendiri! Kamu peka terhadap perasaan dan tahu apa yang kamu inginkan. Pemikir yang dalam, reflektif, dan punya tujuan hidup yang kuat. Kamu tahu ke mana langkahmu pergi.",
+  
+  naturalistic: "Kamu punya koneksi kuat dengan alam! Kamu suka mengamati tumbuhan, hewan, atau fenomena alam. Dunia sekitar terasa hidup dan penuh makna buatmu. Kamu tahu bahwa bumi layak dijaga."
 };
+
+
 
 // Questions for the test - 5 questions per intelligence type
 export const questions: Question[] = [

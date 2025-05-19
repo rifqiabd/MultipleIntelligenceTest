@@ -6,7 +6,7 @@ import { Radar } from 'react-chartjs-2';
 import { intelligenceTypes, intelligenceDescriptions, IntelligenceType } from "@/data/testQuestions";
 import { intelligenceCharacteristics, TestResult } from "@/data/testResultsTypes";
 import { registerChartComponents } from "@/utils/chartConfig";
-import { PrinterIcon } from "lucide-react";
+import { PrinterIcon, HomeIcon } from "lucide-react";
 import { saveTestResult } from "@/integrations/supabase/api";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -174,7 +174,7 @@ const TestResults = () => {
         </div>
         <Card className="mb-6">
           <CardHeader className="flex flex-col sm:flex-row justify-between items-center">
-            <CardTitle className="text-2xl text-center">Profil Kecerdasan Majemuk Anda</CardTitle>
+            <CardTitle className="text-2xl text-center">🧠 Profil Kecerdasan Majemuk Anda</CardTitle>
             <div className="mt-2 sm:mt-0">
               {isSaving && <div className="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full animate-pulse">Menyimpan...</div>}
               {isSaved && <div className="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full">Tersimpan ✓</div>}
@@ -298,11 +298,10 @@ const TestResults = () => {
         {/* Characteristics Card */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-xl">Ciri-ciri Kecerdasan {intelligenceTypes[result.dominantType]}</CardTitle>
+            <CardTitle className="text-xl">Ciri-ciri Kecerdasan {intelligenceTypes[result.dominantType].slice(2)}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="mb-4">
-              Berdasarkan hasil tes, Anda memiliki kecenderungan kuat pada kecerdasan {intelligenceTypes[result.dominantType].toLowerCase()}.
               Berikut adalah ciri-ciri umum yang dimiliki orang dengan kecerdasan ini:
             </p>
 
@@ -314,11 +313,14 @@ const TestResults = () => {
           </CardContent>
         </Card>
 
-        <div className="text-center flex gap-4 justify-center print:hidden">
-          <Button onClick={handleReturnHome} className="px-8">Kembali ke Beranda</Button>
+        <div className="text-center flex gap-4 justify-center max-w-screen print:hidden">
+          <Button onClick={handleReturnHome} className="px-8 bg-blue-600 hover:bg-blue-700">
+            <HomeIcon className="mr-2 h-4 w-4" />
+            Beranda
+          </Button>
           <Button onClick={handlePrint} className="px-8 bg-green-600 hover:bg-green-700">
             <PrinterIcon className="mr-2 h-4 w-4" />
-            Cetak Hasil
+            Cetak
           </Button>
         </div>
       </div>
