@@ -39,17 +39,17 @@ const Index = () => {
   
   return (
     <div className="min-h-screen flex flex-col items-center justify-start bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-4 overflow-x-hidden">
-      {/* Header dengan efek glassmorphism */}
+      {/* Header sederhana tanpa efek kartu */}
       <motion.div 
         initial={{ y: -50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.8 }}
-        className="w-full max-w-6xl mx-auto mt-10 mb-6 px-6 py-4 bg-white bg-opacity-70 backdrop-blur-lg rounded-xl shadow-lg"
+        className="w-full max-w-6xl mx-auto mt-10 mb-12 px-6 py-4"
       >
         <div className="flex items-center justify-center">
-          <div className="text-center md:text-left">
-            <h1 className="text-4xl font-bold mb-1 text-purple-800 md:text-5xl">Tes Kecerdasan Majemuk</h1>
-            <p className="text-lg text-gray-700 max-w-2xl">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold mb-3 text-purple-800 md:text-6xl">Tes Kecerdasan Majemuk</h1>
+            <p className="text-xl text-gray-700 max-w-3xl mx-auto">
               Temukan profil kecerdasan unik Anda berdasarkan teori kecerdasan majemuk Howard Gardner.
             </p>
           </div>
