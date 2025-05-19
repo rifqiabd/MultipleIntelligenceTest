@@ -16,14 +16,14 @@ export type Question = {
 };
 
 export const intelligenceTypes: Record<IntelligenceType, string> = {
-  linguistic: "🗣️ Linguistik",
-  logical: "🧠 Logis-Matematis",
-  musical: "🎵 Musikal",
-  bodily: "🤸‍♂️ Kinestetik-Tubuh",
-  spatial: "🧭 Spasial",
-  interpersonal: "🧑‍🤝‍🧑 Interpersonal",
-  intrapersonal: "🧘‍♂️ Intrapersonal",
-  naturalistic: "🌿 Naturalis"
+  linguistic: "Verbal/Linguistik",
+  logical: "Logika-Matematika",
+  musical: "Musikal",
+  bodily: "Kinestetik",
+  spatial: "Visual-Spasial",
+  interpersonal: "Interpersonal",
+  intrapersonal: "Intrapersonal",
+  naturalistic: "Naturalis"
 };
 
 export const intelligenceDescriptions: Record<IntelligenceType, string> = {

@@ -151,7 +151,7 @@ const TestResults = () => {
         },
         pointLabels: {
           font: {
-            size: 12
+            size: 10
           }
         }
       }
@@ -164,27 +164,27 @@ const TestResults = () => {
     }
   };
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 print:py-2 print:px-0">
-      <div ref={resultRef} className="container mx-auto max-w-3xl px-0">
-        <div className="text-center mb-4">
+    <div className="min-h-screen bg-gray-50 py-4 px-5 print:py-10  print:px-30">
+      <div ref={resultRef} className="container mx-auto max-w-4xl px-4">
+        <div className="text-center mb-2 print:hidden">
           <h3 className="text-lg font-medium">Terima kasih, {result.name}!</h3>
           <p className="text-gray-600">
             Berikut adalah hasil dari penilaian kecerdasan majemuk Anda.
           </p>
         </div>
-        <Card className="mb-6">
+        <Card className="mb-2">
           <CardHeader className="flex flex-col sm:flex-row justify-between items-center">
-            <CardTitle className="text-2xl text-center">🧠 Profil Kecerdasan Majemuk Anda</CardTitle>
-            <div className="mt-2 sm:mt-0">
+            <CardTitle className="text-xl text-center">🧠 Profil Kecerdasan Majemuk Anda</CardTitle>
+            <div className="mt-1 sm:mt-0">  
               {isSaving && <div className="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full animate-pulse">Menyimpan...</div>}
               {isSaved && <div className="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full">Tersimpan ✓</div>}
             </div>
           </CardHeader>
           <CardContent>
             {/* User Profile Section */}
-            <Card className="mb-5 bg-gray-50">
-              <CardContent className="pt-4">
-                <div className="grid grid-cols-2 gap-4">
+            <Card className="mb-1 bg-gray-50">
+              <CardContent className="pt-3">
+                <div className="grid grid-cols-2 gap-1">
                   <div>
                     <p className="text-sm text-gray-500">Nama:</p>
                     <p className="font-medium">{result.name}</p>
@@ -215,23 +215,23 @@ const TestResults = () => {
           </CardContent>
         </Card>
 
-        <Card className="mb-6">
+        <Card className="mb-2">
           <CardHeader>
             <CardTitle className="text-xl">Kecerdasan Dominan Anda: {intelligenceTypes[result.dominantType]}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="mb-4">{intelligenceDescriptions[result.dominantType]}</p>
+            <p className="mb-4 text-md">{intelligenceDescriptions[result.dominantType]}</p>
 
             <h3 className="font-bold text-lg mb-2">Skor Kecerdasan Anda</h3>
-            <div className="h-64 w-full">
+            <div className="h-64 w-full print:hidden">
               <Radar
                 data={{
                   labels: [
-                    "Linguistik",
-                    "Logis-Matematis",
+                    "Verbal/Linguistik",
+                    "Logika-Matematika",
                     "Musikal",
-                    "Kinestetik-Tubuh",
-                    "Spasial",
+                    "Kinestetik",
+                    "Visual-Spasial",
                     "Interpersonal",
                     "Intrapersonal",
                     "Naturalis"
@@ -284,7 +284,7 @@ const TestResults = () => {
             </div>
 
             {/* Numerical scores in grid format */}
-            <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-2">
+            <div className="mt-5 grid grid-cols-2 md:grid-cols-4 gap-2">
               {sortedScores.map(({ type, score }) => (
                 <div key={type} className="bg-gray-50 p-3 rounded">
                   <div className="text-sm text-gray-500">{intelligenceTypes[type]}</div>
@@ -296,20 +296,22 @@ const TestResults = () => {
         </Card>
 
         {/* Characteristics Card */}
-        <Card className="mb-6">
+        <Card className="mb-4">
           <CardHeader>
             <CardTitle className="text-xl">Ciri-ciri Kecerdasan {intelligenceTypes[result.dominantType].slice(2)}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="mb-4">
+            <p className="mb-2">
               Berikut adalah ciri-ciri umum yang dimiliki orang dengan kecerdasan ini:
             </p>
 
-            <ul className="list-disc pl-5 space-y-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
               {intelligenceCharacteristics[result.dominantType].map((characteristic, index) => (
-                <li key={index}>{characteristic}</li>
+              <div key={index} className="bg-gray-100 rounded p-3 flex items-start">
+              <span>{characteristic}</span>
+              </div>
               ))}
-            </ul>
+            </div>
           </CardContent>
         </Card>
 
