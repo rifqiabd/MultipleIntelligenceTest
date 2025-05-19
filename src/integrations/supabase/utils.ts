@@ -6,13 +6,27 @@ import { supabase } from './client';
  */
 export async function checkSupabaseConnection() {
   try {
+    // Check if environment variables are available
+    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      console.error('Supabase environment variables are missing!');
+      return false;
+    }
+    
+    console.log('Testing Supabase connection...');
+    
     // Try to ping the database with a simple query
     const { data, error } = await supabase
       .from('test_results')
       .select('id')
       .limit(1);
     
-    return !error;
+    if (error) {
+      console.error('Supabase connection test failed:', error);
+      return false;
+    }
+    
+    console.log('Supabase connection successful!');
+    return true;
   } catch (error) {
     console.error('Error checking Supabase connection:', error);
     return false;

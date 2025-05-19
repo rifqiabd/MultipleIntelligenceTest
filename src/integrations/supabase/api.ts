@@ -5,16 +5,22 @@ import type { TestResult } from '@/data/testResultsTypes';
  * Maps frontend TestResult object to database format
  */
 function mapToDbFormat(resultData: TestResult) {
-  return {
-    name: resultData.name,
-    age: resultData.age,
-    gender: resultData.gender,
-    email: resultData.email,
-    student_class: resultData.studentClass,
-    date: resultData.date,
-    results: resultData.results,
-    dominant_type: resultData.dominantType
+  // Generate a complete DB format object and validate values
+  const dbData = {
+    // Include ID only if it exists and is not empty
+    ...(resultData.id && resultData.id.trim() !== "" ? { id: resultData.id } : {}),
+    name: resultData.name || "",
+    age: Number(resultData.age) || 0,
+    gender: resultData.gender || "",
+    email: resultData.email || "",
+    student_class: resultData.studentClass || "",
+    date: resultData.date || new Date().toISOString(),
+    results: resultData.results || {},
+    dominant_type: resultData.dominantType || "logical"
   };
+  
+  console.log("[Supabase] Mapped data:", dbData);
+  return dbData;
 }
 
 /**
@@ -37,15 +43,42 @@ function mapFromDbFormat(dbResult: any): TestResult {
 // Save test result to Supabase
 export async function saveTestResult(resultData: TestResult) {
   try {
+    console.log("[Supabase] Attempting to save test result:", resultData);
+    
+    // Validate the data types before inserting
+    const dbData = mapToDbFormat(resultData);
+    
+    console.log("[Supabase] Mapped data for DB:", dbData);
+    console.log("[Supabase] Using URL:", import.meta.env.VITE_SUPABASE_URL);
+    
+    // Ensure date is a valid ISO string
+    if (!dbData.date) {
+      dbData.date = new Date().toISOString();
+    }
+    
+    // Make sure age is a number
+    dbData.age = Number(dbData.age);
+    
+    // Ensure ID is removed if it's empty (let Supabase generate it)
+    if (dbData.id === "") {
+      delete dbData.id; // Remove empty ID to let Supabase generate one
+    }
+    
+    console.log("[Supabase] Sending data to Supabase...");
     const { data, error } = await supabase
       .from('test_results')
-      .insert(mapToDbFormat(resultData))
+      .insert(dbData)
       .select();
     
-    if (error) throw error;
+    if (error) {
+      console.error("[Supabase] Insert error details:", error);
+      throw error;
+    }
+    
+    console.log("[Supabase] Successfully saved to Supabase:", data);
     return { success: true, data };
   } catch (error) {
-    console.error('Error saving test result:', error);
+    console.error('[Supabase] Error saving test result:', error);
     return { success: false, error };
   }
 }

@@ -32,26 +32,36 @@ const TestResults = () => {
     const parsedResult = JSON.parse(resultData);
     setResult(parsedResult);
 
-    // Check if already saved to avoid duplicate submissions
+    // Check if already saved to Supabase
     const savedToSupabase = sessionStorage.getItem("resultSavedToSupabase");
-    if (savedToSupabase !== "true") {
-      // Add timestamp if missing
-      if (!parsedResult.date) {
-        parsedResult.date = new Date().toISOString();
-      }
-      handleSaveResult(parsedResult);
-    } else {
+    if (savedToSupabase === "true") {
       setIsSaved(true);
     }
-  }, [navigate]);
-
-  const handleSaveResult = async (resultData: TestResult) => {
+  }, [navigate]);const handleSaveResult = async (resultData: TestResult) => {
     if (isSaving || !resultData) return;
     setIsSaving(true);
+    
+    // Generate an ID if missing
+    if (!resultData.id) {
+      resultData.id = crypto.randomUUID();
+    }
+    
+    // Format date consistently as ISO string
+    if (!resultData.date || typeof resultData.date !== 'string') {
+      resultData.date = new Date().toISOString();
+    }
+    
+    console.log("[TestResults] Attempting to save test result:", resultData);
+    console.log("[TestResults] SupabaseURL:", import.meta.env.VITE_SUPABASE_URL);
+    
     try {
+      // Clear session flag to ensure we don't think it's already saved
+      sessionStorage.removeItem("resultSavedToSupabase");
+      
       const { success, error } = await saveTestResult(resultData);
 
       if (success) {
+        console.log("[TestResults] Save successful!");
         sessionStorage.setItem("resultSavedToSupabase", "true");
         setIsSaved(true);
         toast({
@@ -59,15 +69,15 @@ const TestResults = () => {
           description: "Hasil tes berhasil disimpan ke database",
         });
       } else {
+        console.error("[TestResults] Save failed:", error);
         toast({
           title: "Gagal menyimpan hasil",
           description: "Hasil tes tetap tersedia secara lokal",
           variant: "destructive",
         });
-        console.error(error);
       }
     } catch (err) {
-      console.error("Error saving test result:", err);
+      console.error("[TestResults] Exception during save:", err);
       toast({
         title: "Gagal terhubung ke database",
         description: "Hasil tes tetap tersedia secara lokal",

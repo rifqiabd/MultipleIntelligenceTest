@@ -6,9 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { questions, IntelligenceType } from "@/data/testQuestions";
 import { UserData } from "./TestEntryForm";
+import { saveTestResult } from "@/integrations/supabase/api";
+import { TestResult } from "@/data/testResultsTypes";
 
 // Shuffle array using Fisher-Yates algorithm
 const shuffleArray = <T,>(array: T[]): T[] => {
@@ -32,9 +34,39 @@ const TestQuestions = () => {
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [currentAnswer, setCurrentAnswer] = useState<string>("0");
   const [progress, setProgress] = useState(0);
+  const [isSaving, setIsSaving] = useState(false);
   
   const navigate = useNavigate();
   const { toast } = useToast();
+  
+  // Fungsi untuk menyimpan hasil ke Supabase
+  const saveResultToSupabase = async (resultData: TestResult) => {
+    setIsSaving(true);
+    try {
+      console.log("Saving test result to Supabase:", resultData);
+      const { success, error } = await saveTestResult(resultData);
+      
+      if (success) {
+        console.log("Test result saved successfully to Supabase");
+        // Set flag untuk menunjukkan hasil sudah disimpan ke Supabase
+        sessionStorage.setItem("resultSavedToSupabase", "true");
+        toast({
+          title: "Hasil tersimpan",
+          description: "Hasil tes berhasil disimpan ke database",
+        });
+      } else {
+        console.error("Failed to save test result to Supabase:", error);
+        toast({
+          title: "Penyimpanan hasil",
+          description: "Hasil tes sedang disimpan di latar belakang",
+        });
+      }
+    } catch (err) {
+      console.error("Error saving test result to Supabase:", err);
+    } finally {
+      setIsSaving(false);
+    }
+  };
   
   useEffect(() => {
     // Check if user data exists
@@ -131,25 +163,24 @@ const TestQuestions = () => {
         dominantType = typedKey;
       }
     });
-    
-    // Create result object
-    const result = {
-      id: new Date().getTime().toString(),
+    // Create result object with UUID id for Supabase compatibility
+    const result: TestResult = {
+      id: crypto.randomUUID(),
       name: userData.name,
       age: userData.age,
-      gender: userData.gender,      email: userData.email,
+      gender: userData.gender,
+      email: userData.email,
       studentClass: userData.studentClass,
       date: new Date().toISOString(),
-      results: percentageScores,
+      results: percentageScores as Record<IntelligenceType, number>,
       dominantType
     };
     
-    // Store result in localStorage (for admin dashboard)
-    const existingResults = JSON.parse(localStorage.getItem("testResults") || "[]");
-    localStorage.setItem("testResults", JSON.stringify([...existingResults, result]));
-    
-    // Also store in session storage for results page
+    // Simpan hasil ke sessionStorage
     sessionStorage.setItem("testResult", JSON.stringify(result));
+    
+    // Simpan hasil langsung ke Supabase
+    saveResultToSupabase(result);
     
     // Navigate to results page
     navigate("/test/results");
