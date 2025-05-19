@@ -137,10 +137,9 @@ const TestQuestions = () => {
       id: new Date().getTime().toString(),
       name: userData.name,
       age: userData.age,
-      gender: userData.gender,
-      email: userData.email,
+      gender: userData.gender,      email: userData.email,
       studentClass: userData.studentClass,
-      date: new Date().toISOString().split("T")[0],
+      date: new Date().toISOString(),
       results: percentageScores,
       dominantType
     };

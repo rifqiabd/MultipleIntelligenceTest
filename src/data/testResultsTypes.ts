@@ -77,6 +77,13 @@ export const intelligenceCharacteristics: Record<IntelligenceType, string[]> = {
 export const getChartData = (testResults: TestResult[]) => {  
   // For bar chart - count occurrences of dominant types
   const dominantTypeCounts: Record<string, number> = {};
+  
+  // Initialize with all possible intelligence types to avoid empty chart
+  Object.keys(intelligenceTypes).forEach(type => {
+    dominantTypeCounts[type] = 0;
+  });
+  
+  // Count occurrences of dominant types
   testResults.forEach(result => {
     const type = result.dominantType;
     dominantTypeCounts[type] = (dominantTypeCounts[type] || 0) + 1;

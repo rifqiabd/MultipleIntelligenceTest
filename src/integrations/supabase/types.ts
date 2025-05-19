@@ -9,7 +9,68 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      test_results: {
+        Row: {
+          id: string
+          name: string
+          age: number
+          gender: string
+          email: string
+          student_class: string
+          date: string
+          results: {
+            linguistic: number
+            logical: number
+            musical: number
+            bodily: number
+            spatial: number
+            interpersonal: number
+            intrapersonal: number
+            naturalistic: number
+          }
+          dominant_type: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          age: number
+          gender: string
+          email: string
+          student_class: string
+          date?: string
+          results: {
+            linguistic: number
+            logical: number
+            musical: number
+            bodily: number
+            spatial: number
+            interpersonal: number
+            intrapersonal: number
+            naturalistic: number
+          }
+          dominant_type: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          age?: number
+          gender?: string
+          email?: string
+          student_class?: string
+          date?: string
+          results?: {
+            linguistic: number
+            logical: number
+            musical: number
+            bodily: number
+            spatial: number
+            interpersonal: number
+            intrapersonal: number
+            naturalistic: number
+          }
+          dominant_type?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never

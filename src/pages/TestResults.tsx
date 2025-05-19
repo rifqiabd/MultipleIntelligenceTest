@@ -7,32 +7,82 @@ import { intelligenceTypes, intelligenceDescriptions, IntelligenceType } from "@
 import { intelligenceCharacteristics, TestResult } from "@/data/testResultsTypes";
 import { registerChartComponents } from "@/utils/chartConfig";
 import { PrinterIcon } from "lucide-react";
+import { saveTestResult } from "@/integrations/supabase/api";
+import { useToast } from "@/components/ui/use-toast";
 
 // Register Chart.js components
 registerChartComponents();
 
 const TestResults = () => {
   const [result, setResult] = useState<TestResult | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
   const navigate = useNavigate();
   const resultRef = useRef<HTMLDivElement>(null);
-  
+  const { toast } = useToast();
   useEffect(() => {
     // Get test result from session storage
     const resultData = sessionStorage.getItem("testResult");
-    
+
     if (!resultData) {
       navigate("/test");
       return;
     }
-    
-    setResult(JSON.parse(resultData));
+
+    const parsedResult = JSON.parse(resultData);
+    setResult(parsedResult);
+
+    // Check if already saved to avoid duplicate submissions
+    const savedToSupabase = sessionStorage.getItem("resultSavedToSupabase");
+    if (savedToSupabase !== "true") {
+      // Add timestamp if missing
+      if (!parsedResult.date) {
+        parsedResult.date = new Date().toISOString();
+      }
+      handleSaveResult(parsedResult);
+    } else {
+      setIsSaved(true);
+    }
   }, [navigate]);
-  
+
+  const handleSaveResult = async (resultData: TestResult) => {
+    if (isSaving || !resultData) return;
+    setIsSaving(true);
+    try {
+      const { success, error } = await saveTestResult(resultData);
+
+      if (success) {
+        sessionStorage.setItem("resultSavedToSupabase", "true");
+        setIsSaved(true);
+        toast({
+          title: "Hasil tersimpan",
+          description: "Hasil tes berhasil disimpan ke database",
+        });
+      } else {
+        toast({
+          title: "Gagal menyimpan hasil",
+          description: "Hasil tes tetap tersedia secara lokal",
+          variant: "destructive",
+        });
+        console.error(error);
+      }
+    } catch (err) {
+      console.error("Error saving test result:", err);
+      toast({
+        title: "Gagal terhubung ke database",
+        description: "Hasil tes tetap tersedia secara lokal",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const handleReturnHome = () => {
     // Clear session data
     sessionStorage.removeItem("userData");
     sessionStorage.removeItem("testResult");
-    
+
     // Return to home page
     navigate("/");
   };
@@ -53,7 +103,7 @@ const TestResults = () => {
   if (!result) {
     return <div className="flex justify-center items-center min-h-screen">Memuat hasil...</div>;
   }
-  
+
   // Sort intelligences by score (highest first)
   const sortedScores = Object.entries(result.results)
     .sort(([, a], [, b]) => b - a)
@@ -61,10 +111,10 @@ const TestResults = () => {
       type: type as IntelligenceType,
       score,
     }));
-  
+
   // Prepare data for Chart.js radar chart
   const chartData = {
-    labels: Object.keys(result.results).map(key => 
+    labels: Object.keys(result.results).map(key =>
       intelligenceTypes[key as IntelligenceType]
     ),
     datasets: [
@@ -103,13 +153,22 @@ const TestResults = () => {
       }
     }
   };
-
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 print:py-2 print:px-0">
       <div ref={resultRef} className="container mx-auto max-w-3xl px-0">
+        <div className="text-center mb-4">
+          <h3 className="text-lg font-medium">Terima kasih, {result.name}!</h3>
+          <p className="text-gray-600">
+            Berikut adalah hasil dari penilaian kecerdasan majemuk Anda.
+          </p>
+        </div>
         <Card className="mb-6">
-          <CardHeader>
+          <CardHeader className="flex flex-col sm:flex-row justify-between items-center">
             <CardTitle className="text-2xl text-center">Profil Kecerdasan Majemuk Anda</CardTitle>
+            <div className="mt-2 sm:mt-0">
+              {isSaving && <div className="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full animate-pulse">Menyimpan...</div>}
+              {isSaved && <div className="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full">Tersimpan ✓</div>}
+            </div>
           </CardHeader>
           <CardContent>
             {/* User Profile Section */}
@@ -143,47 +202,89 @@ const TestResults = () => {
                 </div>
               </CardContent>
             </Card>
-            
-            <div className="text-center mb-4">
-              <h3 className="text-lg font-medium">Terima kasih, {result.name}!</h3>
-              <p className="text-gray-600">
-                Berikut adalah hasil dari penilaian kecerdasan majemuk Anda.
-              </p>
-            </div>
-            
-            <div className="w-full h-96 mx-auto">
-              <Radar data={chartData} options={chartOptions} />
-            </div>
           </CardContent>
         </Card>
-        
+
         <Card className="mb-6">
           <CardHeader>
             <CardTitle className="text-xl">Kecerdasan Dominan Anda: {intelligenceTypes[result.dominantType]}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="mb-4">{intelligenceDescriptions[result.dominantType]}</p>
-            
+
             <h3 className="font-bold text-lg mb-2">Skor Kecerdasan Anda</h3>
-            <div className="space-y-4">
+            <div className="h-64 w-full">
+              <Radar
+                data={{
+                  labels: [
+                    "Linguistik",
+                    "Logis-Matematis",
+                    "Musikal",
+                    "Kinestetik-Tubuh",
+                    "Spasial",
+                    "Interpersonal",
+                    "Intrapersonal",
+                    "Naturalis"
+                  ],
+                  datasets: [
+                    {
+                      label: 'Skor',
+                      data: [
+                        result.results.linguistic,
+                        result.results.logical,
+                        result.results.musical,
+                        result.results.bodily,
+                        result.results.spatial,
+                        result.results.interpersonal,
+                        result.results.intrapersonal,
+                        result.results.naturalistic,
+                      ],
+                      backgroundColor: 'rgba(136, 132, 216, 0.2)',
+                      borderColor: 'rgba(136, 132, 216, 1)',
+                      borderWidth: 1,
+                      pointBackgroundColor: 'rgba(136, 132, 216, 1)',
+                    }
+                  ]
+                }}
+                options={{
+                  scales: {
+                    r: {
+                      beginAtZero: true,
+                      max: 100,
+                      ticks: {
+                        stepSize: 20
+                      }
+                    }
+                  },
+                  plugins: {
+                    tooltip: {
+                      callbacks: {
+                        label: function (context) {
+                          return `${context.label}: ${context.raw}%`;
+                        }
+                      }
+                    },
+                    legend: {
+                      display: false
+                    }
+                  },
+                  maintainAspectRatio: false
+                }}
+              />
+            </div>
+
+            {/* Numerical scores in grid format */}
+            <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-2">
               {sortedScores.map(({ type, score }) => (
-                <div key={type}>
-                  <div className="flex justify-between mb-1">
-                    <span className="font-medium">{intelligenceTypes[type]}</span>
-                    <span>{score}%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2.5">
-                    <div 
-                      className="bg-purple-600 h-2.5 rounded-full" 
-                      style={{ width: `${score}%` }}
-                    ></div>
-                  </div>
+                <div key={type} className="bg-gray-50 p-3 rounded">
+                  <div className="text-sm text-gray-500">{intelligenceTypes[type]}</div>
+                  <div className="font-medium text-purple-700">{score}%</div>
                 </div>
               ))}
             </div>
           </CardContent>
         </Card>
-        
+
         {/* Characteristics Card */}
         <Card className="mb-6">
           <CardHeader>
@@ -191,10 +292,10 @@ const TestResults = () => {
           </CardHeader>
           <CardContent>
             <p className="mb-4">
-              Berdasarkan hasil tes, Anda memiliki kecenderungan kuat pada kecerdasan {intelligenceTypes[result.dominantType].toLowerCase()}. 
+              Berdasarkan hasil tes, Anda memiliki kecenderungan kuat pada kecerdasan {intelligenceTypes[result.dominantType].toLowerCase()}.
               Berikut adalah ciri-ciri umum yang dimiliki orang dengan kecerdasan ini:
             </p>
-            
+
             <ul className="list-disc pl-5 space-y-2">
               {intelligenceCharacteristics[result.dominantType].map((characteristic, index) => (
                 <li key={index}>{characteristic}</li>
@@ -202,7 +303,7 @@ const TestResults = () => {
             </ul>
           </CardContent>
         </Card>
-        
+
         <div className="text-center flex gap-4 justify-center print:hidden">
           <Button onClick={handleReturnHome} className="px-8">Kembali ke Beranda</Button>
           <Button onClick={handlePrint} className="px-8 bg-green-600 hover:bg-green-700">

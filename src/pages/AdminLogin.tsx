@@ -5,31 +5,36 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
-
-// Mock admin credentials (in a real app, this would be handled securely on the backend)
-const ADMIN_USERNAME = "admin";
-const ADMIN_PASSWORD = "password123";
+import { useToast } from "@/components/ui/use-toast";
+import { signInWithEmail } from "@/integrations/supabase/auth";
 
 const AdminLogin = () => {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     
-    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+    const { success, error } = await signInWithEmail(email, password);
+    
+    if (success) {
       // Store admin login state in localStorage
       localStorage.setItem("isAdminLoggedIn", "true");
-      navigate("/admin/dashboard");    } else {
+      navigate("/admin/dashboard");
+    } else {
       toast({
         title: "Login Gagal",
-        description: "Username atau password tidak valid",
+        description: "Email atau password tidak valid",
         variant: "destructive",
       });
+      console.error(error);
     }
+    
+    setIsLoading(false);
   };
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
@@ -39,15 +44,14 @@ const AdminLogin = () => {
           <CardDescription className="text-center">
             Silakan login untuk mengakses dashboard admin
           </CardDescription>
-        </CardHeader>
-        <form onSubmit={handleLogin}>          <CardContent className="space-y-4">
+        </CardHeader>        <form onSubmit={handleLogin}>          <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username">Nama Pengguna</Label>
+              <Label htmlFor="email">Email</Label>
               <Input 
-                id="username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>
