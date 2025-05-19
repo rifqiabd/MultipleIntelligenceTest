@@ -6,9 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { questions, IntelligenceType } from "@/data/testQuestions";
 import { UserData } from "./TestEntryForm";
+import { saveTestResult } from "@/integrations/supabase/api";
+import { TestResult } from "@/data/testResultsTypes";
+import { motion, AnimatePresence } from "framer-motion";
+import { CheckCircle2, Award, Clock, Brain, MoveRight, MoveLeft } from "lucide-react";
+import confetti from "canvas-confetti";
 
 // Shuffle array using Fisher-Yates algorithm
 const shuffleArray = <T,>(array: T[]): T[] => {
@@ -32,9 +37,50 @@ const TestQuestions = () => {
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [currentAnswer, setCurrentAnswer] = useState<string>("0");
   const [progress, setProgress] = useState(0);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [timeSpent, setTimeSpent] = useState(0);
   
   const navigate = useNavigate();
   const { toast } = useToast();
+  
+  // Timer untuk melacak waktu yang dihabiskan
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeSpent(prev => prev + 1);
+    }, 1000);
+    
+    return () => clearInterval(timer);
+  }, []);
+  
+  // Fungsi untuk menyimpan hasil ke Supabase
+  const saveResultToSupabase = async (resultData: TestResult) => {
+    setIsSaving(true);
+    try {
+      console.log("Saving test result to Supabase:", resultData);
+      const { success, error } = await saveTestResult(resultData);
+      
+      if (success) {
+        console.log("Test result saved successfully to Supabase");
+        // Set flag untuk menunjukkan hasil sudah disimpan ke Supabase
+        sessionStorage.setItem("resultSavedToSupabase", "true");
+        toast({
+          title: "Hasil tersimpan",
+          description: "Hasil tes berhasil disimpan ke database",
+        });
+      } else {
+        console.error("Failed to save test result to Supabase:", error);
+        toast({
+          title: "Penyimpanan hasil",
+          description: "Hasil tes sedang disimpan di latar belakang",
+        });
+      }
+    } catch (err) {
+      console.error("Error saving test result to Supabase:", err);
+    } finally {
+      setIsSaving(false);
+    }
+  };
   
   useEffect(() => {
     // Check if user data exists
@@ -47,37 +93,94 @@ const TestQuestions = () => {
     // Shuffle questions to mix up the different types
     setShuffledQuestions(shuffleArray(questions));
   }, [navigate]);
-  
-  useEffect(() => {
+    useEffect(() => {
     // Update progress
     setProgress((currentQuestion / shuffledQuestions.length) * 100);
   }, [currentQuestion, shuffledQuestions.length]);
   
+  // Format waktu dalam format mm:ss
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+  
+  // Mendapatkan nilai jawaban yang dipilih untuk pertanyaan saat ini
+  const getCurrentSelectedValue = () => {
+    const existingAnswer = answers.find(
+      answer => answer.questionId === shuffledQuestions[currentQuestion].id
+    );
+    return existingAnswer ? existingAnswer.value.toString() : currentAnswer;
+  };
+  
+  // Memeriksa apakah pertanyaan telah dijawab
+  const isQuestionAnswered = () => {
+    return currentAnswer !== "0" || answers.some(
+      answer => answer.questionId === shuffledQuestions[currentQuestion].id
+    );
+  };
+  
   const handleAnswer = (value: string) => {
     setCurrentAnswer(value);
   };
-  
-  const handleNext = () => {
+    const handleNext = () => {
     // Save current answer
+    const existingAnswerIndex = answers.findIndex(
+      answer => answer.questionId === shuffledQuestions[currentQuestion].id
+    );
+    
     const answer: Answer = {
       questionId: shuffledQuestions[currentQuestion].id,
       value: parseInt(currentAnswer),
       type: shuffledQuestions[currentQuestion].type
     };
     
-    setAnswers([...answers, answer]);
+    if (existingAnswerIndex >= 0) {
+      // Update jawaban yang sudah ada
+      const updatedAnswers = [...answers];
+      updatedAnswers[existingAnswerIndex] = answer;
+      setAnswers(updatedAnswers);
+    } else {
+      // Tambahkan jawaban baru
+      setAnswers([...answers, answer]);
+    }
     
     // Move to next question or complete test
     if (currentQuestion < shuffledQuestions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
-      setCurrentAnswer("0"); // Reset for next question
+      setCurrentAnswer("0"); // Reset untuk pertanyaan berikutnya
     } else {
       // Calculate results
       calculateResults();
     }
   };
   
-  const calculateResults = () => {
+  const handlePrevious = () => {
+    if (currentQuestion > 0) {
+      setCurrentQuestion(currentQuestion - 1);
+      
+      // Set jawaban dari pertanyaan sebelumnya jika ada
+      const previousAnswer = answers.find(
+        answer => answer.questionId === shuffledQuestions[currentQuestion - 1].id
+      );
+      
+      if (previousAnswer) {
+        setCurrentAnswer(previousAnswer.value.toString());
+      } else {
+        setCurrentAnswer("0");
+      }
+    }
+  };
+    const calculateResults = () => {
+    setIsSubmitting(true);
+    
+    // Tampilkan animasi konfetti saat selesai
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 }
+    });
+    
     // Get user data
     const userData = JSON.parse(sessionStorage.getItem("userData") || "{}") as UserData;
     
@@ -131,26 +234,24 @@ const TestQuestions = () => {
         dominantType = typedKey;
       }
     });
-    
-    // Create result object
-    const result = {
-      id: new Date().getTime().toString(),
+    // Create result object with UUID id for Supabase compatibility
+    const result: TestResult = {
+      id: crypto.randomUUID(),
       name: userData.name,
       age: userData.age,
       gender: userData.gender,
       email: userData.email,
-      occupation: userData.occupation,
-      date: new Date().toISOString().split("T")[0],
-      results: percentageScores,
+      studentClass: userData.studentClass,
+      date: new Date().toISOString(),
+      results: percentageScores as Record<IntelligenceType, number>,
       dominantType
     };
     
-    // Store result in localStorage (for admin dashboard)
-    const existingResults = JSON.parse(localStorage.getItem("testResults") || "[]");
-    localStorage.setItem("testResults", JSON.stringify([...existingResults, result]));
-    
-    // Also store in session storage for results page
+    // Simpan hasil ke sessionStorage
     sessionStorage.setItem("testResult", JSON.stringify(result));
+    
+    // Simpan hasil langsung ke Supabase
+    saveResultToSupabase(result);
     
     // Navigate to results page
     navigate("/test/results");
@@ -158,52 +259,130 @@ const TestQuestions = () => {
 
   // If questions aren't loaded yet
   if (shuffledQuestions.length === 0) {
-    return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
+    return <div className="flex justify-center items-center min-h-screen">Memuat...</div>;
   }
 
   const question = shuffledQuestions[currentQuestion];
-
+  // Hitung jumlah total pertanyaan yang sudah dijawab
+  const totalAnswered = answers.length;
+  
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <Card className="w-full max-w-lg">
-        <CardHeader>
-          <CardTitle className="text-xl text-center">Multiple Intelligences Test</CardTitle>
-          <CardDescription className="text-center">
-            Question {currentQuestion + 1} of {shuffledQuestions.length}
-          </CardDescription>
-          <Progress value={progress} className="w-full" />
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="text-lg font-medium text-center mb-4">{question.text}</div>
-          
-          <RadioGroup 
-            value={currentAnswer} 
-            onValueChange={handleAnswer}
-            className="space-y-3"
+    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-blue-50 py-8 px-1">
+      <div className="container mx-auto max-w-3xl">
+        {/* Header dengan statistik */}
+        <div className="flex items-center justify-between mb-4 text-sm text-gray-600">
+          <div className="flex items-center">
+            <Brain className="h-4 w-4 mr-1 text-purple-500" />
+            <span>Tes Kecerdasan Majemuk</span>
+          </div>
+          <div className="flex items-center">
+            <Clock className="h-4 w-4 mr-1 text-blue-500" />
+            <span>{formatTime(timeSpent)}</span>
+          </div>
+        </div>
+        
+        {/* Progress bar */}
+        <div className="mb-6">
+          <div className="flex justify-between text-xs text-gray-600 mb-1">
+            <span>Kemajuan</span>
+            <span>{totalAnswered} dari {shuffledQuestions.length} pertanyaan</span>
+          </div>
+          <Progress value={progress} className="h-2" />
+        </div>
+
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentQuestion}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.3 }}
           >
-            <div className="flex justify-between items-center">
-              <div>Strongly Disagree</div>
-              <div>Strongly Agree</div>
-            </div>
-            <div className="flex justify-between gap-2">
-              {[1, 2, 3, 4, 5].map((value) => (
-                <div key={value} className="flex flex-col items-center space-y-2">
-                  <RadioGroupItem value={value.toString()} id={`rating-${value}`} />
-                  <Label htmlFor={`rating-${value}`}>{value}</Label>
-                </div>
-              ))}
-            </div>
-          </RadioGroup>
-        </CardContent>
-        <CardFooter className="flex justify-end">
-          <Button 
-            onClick={handleNext} 
-            disabled={!currentAnswer || currentAnswer === "0"}
-          >
-            {currentQuestion < shuffledQuestions.length - 1 ? "Next Question" : "Complete Test"}
-          </Button>
-        </CardFooter>
-      </Card>
+            <Card className="shadow-lg border border-gray-100">
+              <div className="bg-gradient-to-r from-purple-600 to-blue-500 p-5 text-white">
+                <h2 className="text-sm font-medium">Pertanyaan {currentQuestion + 1} dari {shuffledQuestions.length}</h2>
+              </div>
+              
+              <CardContent className="p-4">
+                <p className="text-lg font-medium mb-3">{question.text}</p>
+                
+                <RadioGroup 
+                  value={getCurrentSelectedValue()} 
+                  onValueChange={handleAnswer}
+                  className="space-y-1"
+                >
+                  {[1, 2, 3, 4, 5].map((value) => {
+                    const isSelected = getCurrentSelectedValue() === value.toString();
+                    
+                    return (
+                      <div
+                        key={value}
+                        className={`flex items-center p-3 rounded-lg cursor-pointer transition-all ${
+                          isSelected
+                            ? "bg-purple-100 border-purple-300 border"
+                            : "bg-white border border-gray-200 hover:bg-gray-50"
+                        }`}
+                      >
+                        <RadioGroupItem 
+                          value={value.toString()} 
+                          id={`rating-${value}`}
+                          className="mr-3"
+                        />
+                        <Label 
+                          htmlFor={`rating-${value}`}
+                          className="flex-1 cursor-pointer flex items-center"
+                        >
+                          {value === 1 && "Sangat Tidak Setuju"}
+                          {value === 2 && "Tidak Setuju"}
+                          {value === 3 && "Netral"}
+                          {value === 4 && "Setuju"}
+                          {value === 5 && "Sangat Setuju"}
+                        </Label>
+                        {isSelected && <CheckCircle2 className="h-4 w-4 text-purple-500" />}
+                      </div>
+                    );
+                  })}
+                </RadioGroup>
+              </CardContent>
+              
+              <CardFooter className="px-4 py-3 pt-1 flex justify-between border-t border-gray-100">
+                <Button 
+                  onClick={handleNext} 
+                  disabled={!isQuestionAnswered()}
+                  className={`shadow-sm ${
+                    currentQuestion === shuffledQuestions.length - 1
+                      ? "bg-green-600 hover:bg-green-700"
+                      : "bg-purple-600 hover:bg-purple-700"
+                  }`}
+                >
+                  {currentQuestion < shuffledQuestions.length - 1 ? (
+                    <>
+                      Selanjutnya
+                      <MoveRight className="ml-3 h-4 w-4" />
+                    </>
+                  ) : (
+                    <>
+                      {isSubmitting ? (
+                        <span className="animate-pulse">Memproses...</span>
+                      ) : (
+                        <>
+                          <Award className="mr-2 h-4 w-4" />
+                          Selesaikan Tes
+                        </>
+                      )}
+                    </>
+                  )}
+                </Button>
+              </CardFooter>
+            </Card>
+          </motion.div>
+        </AnimatePresence>
+        
+        {/* Informasi bantuan/tips */}
+        <div className="mt-6 text-center text-xs text-gray-500">
+          <p>Pilih jawaban terbaik yang mencerminkan diri Anda. Tidak ada jawaban benar atau salah.</p>
+        </div>
+      </div>
     </div>
   );
 };

@@ -1,61 +1,86 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
-
-// Mock admin credentials (in a real app, this would be handled securely on the backend)
-const ADMIN_USERNAME = "admin";
-const ADMIN_PASSWORD = "password123";
+import { useToast } from "@/components/ui/use-toast";
+import { signInWithEmail } from "@/integrations/supabase/auth";
+import { ArrowLeft } from "lucide-react";
 
 const AdminLogin = () => {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  
+  // Periksa status login saat komponen dimuat
+  useEffect(() => {
+    const isLoggedIn = localStorage.getItem("isAdminLoggedIn") === "true";
+    if (isLoggedIn) {
+      // Jika sudah login, langsung redirect ke dashboard
+      navigate("/admin/dashboard");
+    }
+  }, [navigate]);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     
-    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+    const { success, error } = await signInWithEmail(email, password);
+    
+    if (success) {
       // Store admin login state in localStorage
       localStorage.setItem("isAdminLoggedIn", "true");
       navigate("/admin/dashboard");
     } else {
       toast({
-        title: "Login Failed",
-        description: "Invalid username or password",
+        title: "Login Gagal",
+        description: "Email atau password tidak valid",
         variant: "destructive",
       });
+      console.error(error);
     }
+    
+    setIsLoading(false);
+  };  const handleBackToHome = () => {
+    navigate("/");
   };
-
+  
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl text-center">Admin Login</CardTitle>
+          <div className="flex justify-between items-center">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleBackToHome}
+              className="mb-2"
+            >
+              <ArrowLeft className="h-4 w-4 mr-1" /> 
+              Kembali ke Beranda
+            </Button>
+          </div>
+          <CardTitle className="text-2xl text-center">Login Admin</CardTitle>
           <CardDescription className="text-center">
-            Please login to access the admin dashboard
+            Silakan login untuk mengakses dashboard admin
           </CardDescription>
-        </CardHeader>
-        <form onSubmit={handleLogin}>
-          <CardContent className="space-y-4">
+        </CardHeader><form onSubmit={handleLogin}>          <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="email">Email</Label>
               <Input 
-                id="username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Kata Sandi</Label>
               <Input 
                 id="password"
                 type="password"
@@ -64,9 +89,14 @@ const AdminLogin = () => {
                 required
               />
             </div>
-          </CardContent>
-          <CardFooter>
-            <Button type="submit" className="w-full">Login</Button>
+          </CardContent>          <CardFooter className="flex flex-col gap-4">
+            <Button 
+              type="submit" 
+              className="w-full"
+              disabled={isLoading}
+            >
+              {isLoading ? "Memproses..." : "Login"}
+            </Button>
           </CardFooter>
         </form>
       </Card>
