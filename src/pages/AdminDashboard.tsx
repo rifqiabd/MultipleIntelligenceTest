@@ -1,14 +1,38 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartContainer, ChartLegend, ChartTooltip } from "@/components/ui/chart";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Radar, Bar } from 'react-chartjs-2';
+import { 
+  Chart as ChartJS, 
+  RadialLinearScale, 
+  PointElement, 
+  LineElement, 
+  Filler, 
+  Tooltip as ChartTooltip, 
+  Legend,
+  CategoryScale,
+  LinearScale,
+  BarElement
+} from 'chart.js';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { intelligenceTypes, intelligenceDescriptions, IntelligenceType } from "@/data/testQuestions";
+
+// Register ChartJS components
+ChartJS.register(
+  RadialLinearScale,
+  PointElement,
+  LineElement,
+  Filler,
+  ChartTooltip,
+  Legend,
+  CategoryScale,
+  LinearScale,
+  BarElement
+);
 
 // Types for our test data
 type TestResult = {
@@ -97,18 +121,27 @@ const mockTestResults: TestResult[] = [
 ];
 
 // Transform data for visualization
-const getChartData = (testResults: TestResult[]) => {
-  // For bar chart - count occurrences of dominant types
+const getChartData = (testResults: TestResult[]) => {  // For bar chart - count occurrences of dominant types
   const dominantTypeCounts: Record<string, number> = {};
   testResults.forEach(result => {
     const type = result.dominantType;
     dominantTypeCounts[type] = (dominantTypeCounts[type] || 0) + 1;
   });
   
-  const barChartData = Object.keys(dominantTypeCounts).map(type => ({
-    name: type,
-    count: dominantTypeCounts[type]
-  }));
+  // Prepare data for Chart.js bar chart
+  const barLabels = Object.keys(dominantTypeCounts);
+  const barCounts = barLabels.map(type => dominantTypeCounts[type]);
+  
+  const barChartData = {
+    labels: barLabels,
+    datasets: [
+      {
+        label: 'Jumlah',
+        data: barCounts,
+        backgroundColor: 'rgba(136, 132, 216, 0.8)',
+      }
+    ]
+  };
 
   // For radar chart - average scores across all participants
   const totalScores = {
@@ -132,41 +165,31 @@ const getChartData = (testResults: TestResult[]) => {
     totalScores.intrapersonal += result.results.intrapersonal;
     totalScores.naturalistic += result.results.naturalistic;
   });
-
-  const radarData = [
-    {
-      subject: "Linguistic",
-      A: testResults.length > 0 ? totalScores.linguistic / testResults.length : 0,
-    },
-    {
-      subject: "Logical",
-      A: testResults.length > 0 ? totalScores.logical / testResults.length : 0,
-    },
-    {
-      subject: "Musical",
-      A: testResults.length > 0 ? totalScores.musical / testResults.length : 0,
-    },
-    {
-      subject: "Bodily",
-      A: testResults.length > 0 ? totalScores.bodily / testResults.length : 0,
-    },
-    {
-      subject: "Spatial",
-      A: testResults.length > 0 ? totalScores.spatial / testResults.length : 0,
-    },
-    {
-      subject: "Interpersonal",
-      A: testResults.length > 0 ? totalScores.interpersonal / testResults.length : 0,
-    },
-    {
-      subject: "Intrapersonal",
-      A: testResults.length > 0 ? totalScores.intrapersonal / testResults.length : 0,
-    },
-    {
-      subject: "Naturalistic",
-      A: testResults.length > 0 ? totalScores.naturalistic / testResults.length : 0,
-    }
-  ];
+  // Para recharts bar chart, nothing changes
+  const radarLabels = ["Linguistik", "Logis", "Musikal", "Kinestetik", "Spasial", "Interpersonal", "Intrapersonal", "Naturalistik"];
+  
+  // For Chart.js radar chart
+  const radarData = {
+    labels: radarLabels,
+    datasets: [
+      {
+        label: 'Rata-rata Skor',
+        data: [
+          testResults.length > 0 ? totalScores.linguistic / testResults.length : 0,
+          testResults.length > 0 ? totalScores.logical / testResults.length : 0,
+          testResults.length > 0 ? totalScores.musical / testResults.length : 0,
+          testResults.length > 0 ? totalScores.bodily / testResults.length : 0,
+          testResults.length > 0 ? totalScores.spatial / testResults.length : 0,
+          testResults.length > 0 ? totalScores.interpersonal / testResults.length : 0,
+          testResults.length > 0 ? totalScores.intrapersonal / testResults.length : 0,
+          testResults.length > 0 ? totalScores.naturalistic / testResults.length : 0,
+        ],
+        backgroundColor: 'rgba(136, 132, 216, 0.2)',
+        borderColor: 'rgba(136, 132, 216, 1)',
+        borderWidth: 1,
+      },
+    ],
+  };
 
   return { barChartData, radarData };
 };
@@ -200,16 +223,8 @@ const AdminDashboard = () => {
     localStorage.removeItem("isAdminLoggedIn");
     navigate("/admin");
   };
-
   // Prepare chart data
   const { barChartData, radarData } = getChartData(testResults);
-
-  const chartConfig = {
-    A: {
-      label: "Average Score",
-      color: "#8884d8"
-    }
-  };
 
   // Intelligence characteristics for each type (copied from TestResults.tsx)
   const intelligenceCharacteristics: Record<string, string[]> = {
@@ -273,70 +288,83 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto p-4">
+      <div className="container mx-auto p-4">        
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-purple-800">Admin Dashboard</h1>
-          <Button variant="outline" onClick={handleLogout}>Logout</Button>
+          <h1 className="text-3xl font-bold text-purple-800">Dashboard Admin</h1>
+          <Button variant="outline" onClick={handleLogout}>Keluar</Button>
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          {/* Chart 1: Average Intelligence Scores */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">          {/* Chart 1: Average Intelligence Scores */}
           <Card>
             <CardHeader>
-              <CardTitle>Average Intelligence Scores</CardTitle>
-            </CardHeader>
+              <CardTitle>Rata-rata Skor Kecerdasan</CardTitle>
+            </CardHeader>            
             <CardContent className="h-80">
-              <ChartContainer className="h-full" config={chartConfig}>
-                <RadarChart data={radarData}>
-                  <PolarGrid />
-                  <PolarAngleAxis dataKey="subject" />
-                  <ChartTooltip />
-                  <Radar name="Average Score" dataKey="A" fill="#8884d8" fillOpacity={0.6} />
-                </RadarChart>
-              </ChartContainer>
+              <div className="h-full w-full">
+                <Radar 
+                  data={radarData} 
+                  options={{
+                    scales: {
+                      r: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                          stepSize: 20
+                        }
+                      }
+                    },
+                    maintainAspectRatio: false
+                  }}
+                />
+              </div>
             </CardContent>
           </Card>
-          
-          {/* Chart 2: Dominant Intelligence Types */}
-          <Card>
+            {/* Chart 2: Dominant Intelligence Types */}          <Card>
             <CardHeader>
-              <CardTitle>Dominant Intelligence Types</CardTitle>
+              <CardTitle>Tipe Kecerdasan Dominan</CardTitle>
             </CardHeader>
             <CardContent className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={barChartData}>
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="count" fill="#8884d8" />
-                </BarChart>
-              </ResponsiveContainer>
+              <div className="h-full w-full">
+                <Bar 
+                  data={barChartData}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                      y: {
+                        beginAtZero: true,
+                        ticks: {
+                          precision: 0
+                        }
+                      }
+                    }
+                  }}
+                />
+              </div>
             </CardContent>
           </Card>
-        </div>
-
-        {/* Test Results Table */}
+        </div>        {/* Test Results Table */}
         <Card>
           <CardHeader>
-            <CardTitle>Test Results</CardTitle>
+            <CardTitle>Hasil Tes</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
-              <Table>
+              <Table>                
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Occupation</TableHead>
-                    <TableHead>Linguistic</TableHead>
-                    <TableHead>Logical</TableHead>
-                    <TableHead>Musical</TableHead>
-                    <TableHead>Bodily</TableHead>
-                    <TableHead>Spatial</TableHead>
+                    <TableHead>Nama</TableHead>
+                    <TableHead>Pekerjaan</TableHead>
+                    <TableHead>Linguistik</TableHead>
+                    <TableHead>Logis</TableHead>
+                    <TableHead>Musikal</TableHead>
+                    <TableHead>Kinestetik</TableHead>
+                    <TableHead>Spasial</TableHead>
                     <TableHead>Interpersonal</TableHead>
                     <TableHead>Intrapersonal</TableHead>
-                    <TableHead>Naturalistic</TableHead>
-                    <TableHead>Dominant Type</TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableHead>Naturalistik</TableHead>
+                    <TableHead>Tipe Dominan</TableHead>
+                    <TableHead>Aksi</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -361,9 +389,8 @@ const AdminDashboard = () => {
                             onClick={() => {
                               setSelectedResult(result);
                               setModalOpen(true);
-                            }}
-                          >
-                            View
+                            }}                            >
+                            Lihat
                           </Button>
                           <Button
                             variant="destructive"
@@ -374,7 +401,7 @@ const AdminDashboard = () => {
                               localStorage.setItem("testResults", JSON.stringify(updatedResults));
                             }}
                           >
-                            Delete
+                            Hapus
                           </Button>
                         </div>
                       </TableCell>
@@ -385,28 +412,26 @@ const AdminDashboard = () => {
             </div>
           </CardContent>
         </Card>
-        
-        {/* Modal for Result Details */}
+          {/* Modal for Result Details */}
         <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden">
+          <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
             <DialogHeader>
-              <DialogTitle>Test Result Details</DialogTitle>
+              <DialogTitle>Detail Hasil Tes</DialogTitle>
             </DialogHeader>
             <ScrollArea className="h-[calc(90vh-120px)]">
               {selectedResult && (
-                <div className="p-4 space-y-6">
-                  {/* User Profile Section */}
+                <div className="p-4 space-y-6">                  {/* User Profile Section */}
                   <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
                     <div>
-                      <p className="text-sm text-gray-500">Name:</p>
+                      <p className="text-sm text-gray-500">Nama:</p>
                       <p className="font-medium">{selectedResult.name}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">Age:</p>
-                      <p className="font-medium">{selectedResult.age} years</p>
+                      <p className="text-sm text-gray-500">Usia:</p>
+                      <p className="font-medium">{selectedResult.age} tahun</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">Gender:</p>
+                      <p className="text-sm text-gray-500">Jenis Kelamin:</p>
                       <p className="font-medium">{selectedResult.gender}</p>
                     </div>
                     <div>
@@ -414,18 +439,18 @@ const AdminDashboard = () => {
                       <p className="font-medium">{selectedResult.email}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">Occupation:</p>
+                      <p className="text-sm text-gray-500">Pekerjaan:</p>
                       <p className="font-medium">{selectedResult.occupation}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">Test Date:</p>
+                      <p className="text-sm text-gray-500">Tanggal Tes:</p>
                       <p className="font-medium">{new Date(selectedResult.date).toLocaleDateString()}</p>
                     </div>
                   </div>
                   
-                  {/* Results Visualization */}
+                  {/* Results Visualization */}                  
                   <div>
-                    <h3 className="font-bold text-lg mb-2">Intelligence Scores</h3>
+                    <h3 className="font-bold text-lg mb-2">Skor Kecerdasan</h3>
                     <div className="space-y-4">
                       {Object.entries(selectedResult.results)
                         .sort(([, a], [, b]) => b - a)
@@ -448,10 +473,10 @@ const AdminDashboard = () => {
                   
                   {/* Dominant Type */}
                   <div>
-                    <h3 className="font-bold text-lg mb-2">Dominant Intelligence: {selectedResult.dominantType}</h3>
+                    <h3 className="font-bold text-lg mb-2">Kecerdasan Dominan: {selectedResult.dominantType}</h3>
                     <p className="mb-4">{intelligenceDescriptions[selectedResult.dominantType as IntelligenceType]}</p>
                     
-                    <h4 className="font-semibold mt-4 mb-2">Characteristics:</h4>
+                    <h4 className="font-semibold mt-4 mb-2">Karakteristik:</h4>
                     <ul className="list-disc pl-5 space-y-1">
                       {intelligenceCharacteristics[selectedResult.dominantType.toLowerCase()]?.map((characteristic, idx) => (
                         <li key={idx}>{characteristic}</li>
