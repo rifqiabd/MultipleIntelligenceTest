@@ -40,6 +40,27 @@ export async function getCurrentUser() {
   }
 }
 
+// Update user profile including display name
+export async function updateUserProfile(displayName: string) {
+  try {
+    const { data, error } = await supabase.auth.updateUser({
+      data: { 
+        display_name: displayName 
+      }
+    });
+    
+    if (error) throw error;
+    
+    // Store display name in localStorage for easy access
+    localStorage.setItem("adminName", displayName);
+    
+    return { success: true, user: data.user };
+  } catch (error) {
+    console.error('Error updating user profile:', error);
+    return { success: false, error };
+  }
+}
+
 // Check if user is admin
 export async function isUserAdmin() {
   try {

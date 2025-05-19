@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Radar, Bar } from 'react-chartjs-2';
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -14,10 +14,10 @@ import { intelligenceTypes, intelligenceDescriptions, IntelligenceType } from "@
 import { TestResult, intelligenceCharacteristics, getChartData } from "@/data/testResultsTypes";
 import { registerChartComponents } from "@/utils/chartConfig";
 import { getAllTestResults, deleteTestResult } from "@/integrations/supabase/api";
-import { signOut } from "@/integrations/supabase/auth";
+import { signOut, updateUserProfile, getCurrentUser } from "@/integrations/supabase/auth";
 import { checkSupabaseConnection, getTestResultsCount, getUniqueClasses } from "@/integrations/supabase/utils";
 import { useToast } from "@/components/ui/use-toast";
-import { Eye, File, Trash, FileText, Sheet } from 'lucide-react';
+import { Eye, File, Trash, FileText, Sheet, User, Edit2 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 
@@ -82,6 +82,11 @@ const AdminDashboard = () => {
   const [dbStatus, setDbStatus] = useState<'connecting' | 'connected' | 'error'>('connecting');
   const [resultCount, setResultCount] = useState<number>(0);
   const [availableClasses, setAvailableClasses] = useState<string[]>([]);
+  const [greeting, setGreeting] = useState<string>("");
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [displayName, setDisplayName] = useState<string>("");
+  const [userEmail, setUserEmail] = useState<string>("");
+  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
 
   // Filters state
   const [filters, setFilters] = useState({
@@ -94,6 +99,42 @@ const AdminDashboard = () => {
 
   const navigate = useNavigate();
   const { toast } = useToast();
+  // Generate greeting based on time of day
+  const generateGreeting = () => {
+    const currentHour = new Date().getHours();
+    let greetingText = "";
+
+    if (currentHour >= 5 && currentHour < 12) {
+      greetingText = "Selamat pagi";
+    } else if (currentHour >= 12 && currentHour < 15) {
+      greetingText = "Selamat siang";
+    } else if (currentHour >= 15 && currentHour < 18) {
+      greetingText = "Selamat sore";
+    } else {
+      greetingText = "Selamat malam";
+    }
+
+    // Get admin name from localStorage if available
+    const adminName = localStorage.getItem("adminName") || "Admin";
+    
+    return `${greetingText}, ${adminName}!`;
+  };
+  
+  // Load current user data
+  const loadUserData = async () => {
+    const { success, user } = await getCurrentUser();
+    if (success && user) {
+      // Set display name from user metadata if available
+      const savedName = user.user_metadata?.display_name || localStorage.getItem("adminName") || "Admin";
+      setDisplayName(savedName);
+      setUserEmail(user.email || "");
+      localStorage.setItem("adminName", savedName);
+      
+      // Update greeting with new name
+      setGreeting(generateGreeting());
+    }
+  };
+
   useEffect(() => {
     // Check if admin is logged in
     const isLoggedIn = localStorage.getItem("isAdminLoggedIn") === "true";
@@ -102,6 +143,12 @@ const AdminDashboard = () => {
       navigate("/admin");
       return;
     }
+
+    // Set greeting message
+    setGreeting(generateGreeting());
+    
+    // Load user data including display name
+    loadUserData();
 
     // Check database connection
     checkDbConnection();
@@ -112,6 +159,32 @@ const AdminDashboard = () => {
     // Load available classes
     fetchUniqueClasses();
   }, [navigate]);
+  
+  // Handle profile update
+  const handleProfileUpdate = async () => {
+    setIsUpdatingProfile(true);
+    const { success, error } = await updateUserProfile(displayName);
+    
+    if (success) {
+      toast({
+        title: "Profil diperbarui",
+        description: "Nama tampilan berhasil diubah",
+      });
+      
+      // Update greeting with new name
+      setGreeting(generateGreeting());
+      setProfileModalOpen(false);
+    } else {
+      toast({
+        title: "Gagal memperbarui profil",
+        description: "Terjadi kesalahan saat mengubah nama tampilan",
+        variant: "destructive",
+      });
+      console.error(error);
+    }
+    
+    setIsUpdatingProfile(false);
+  };
 
   const checkDbConnection = async () => {
     setDbStatus('connecting');
@@ -248,7 +321,12 @@ const AdminDashboard = () => {
       <div className="container mx-auto p-4">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-purple-800">Dashboard Admin</h1>
+            <div className="flex items-center mb-1">
+              <h1 className="text-3xl font-bold text-purple-800 mr-3">Dashboard Admin</h1>
+              <div className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm font-medium">
+                {greeting}
+              </div>
+            </div>
             <div className="mt-1 flex items-center">
               {dbStatus === 'connecting' && (
                 <div className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full animate-pulse">
@@ -269,7 +347,13 @@ const AdminDashboard = () => {
               )}
             </div>
           </div>
-          <Button variant="outline" onClick={handleLogout}>Keluar</Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setProfileModalOpen(true)}>
+              <User className="mr-2" />
+              Profil
+            </Button>
+            <Button variant="outline" onClick={handleLogout}>Keluar</Button>
+          </div>
         </div>
 
         {/* Quick Stats Section */}
@@ -943,6 +1027,47 @@ const AdminDashboard = () => {
                 </div>
               )}
             </ScrollArea>
+          </DialogContent>
+        </Dialog>
+        {/* Modal for Profile Update */}
+        <Dialog open={profileModalOpen} onOpenChange={setProfileModalOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Perbarui Profil</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="display-name">Nama Tampilan</Label>
+                <Input
+                  id="display-name"
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  placeholder="Masukkan nama tampilan"
+                />
+              </div>
+              <div>
+                <Label>Email</Label>
+                <Input
+                  value={userEmail}
+                  disabled
+                  placeholder="Email"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setProfileModalOpen(false)}
+              >
+                Batal
+              </Button>
+              <Button
+                onClick={handleProfileUpdate}
+                disabled={isUpdatingProfile}
+              >
+                {isUpdatingProfile ? "Menyimpan..." : "Simpan"}
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
