@@ -1,4 +1,5 @@
 import { supabase } from './client';
+import { SUPABASE_TABLES } from '@/utils/constants';
 
 /**
  * Check if the Supabase connection is working
@@ -12,11 +13,9 @@ export async function checkSupabaseConnection() {
       return false;
     }
     
-    console.log('Testing Supabase connection...');
-    
     // Try to ping the database with a simple query
-    const { data, error } = await supabase
-      .from('test_results')
+    const { error } = await supabase
+      .from(SUPABASE_TABLES.testResults)
       .select('id')
       .limit(1);
     
@@ -25,7 +24,6 @@ export async function checkSupabaseConnection() {
       return false;
     }
     
-    console.log('Supabase connection successful!');
     return true;
   } catch (error) {
     console.error('Error checking Supabase connection:', error);
@@ -40,7 +38,7 @@ export async function checkSupabaseConnection() {
 export async function getTestResultsCount() {
   try {
     const { count, error } = await supabase
-      .from('test_results')
+      .from(SUPABASE_TABLES.testResults)
       .select('*', { count: 'exact', head: true });
     
     if (error) throw error;
@@ -58,7 +56,7 @@ export async function getTestResultsCount() {
 export async function getUniqueClasses() {
   try {
     const { data, error } = await supabase
-      .from('test_results')
+      .from(SUPABASE_TABLES.testResults)
       .select('student_class')
       .order('student_class');
     

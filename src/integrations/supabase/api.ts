@@ -1,8 +1,25 @@
 import { supabase } from './client';
 import type { TestResult } from '@/data/testResultsTypes';
+import { SUPABASE_TABLES } from '@/utils/constants';
+
+/**
+ * Custom error class for API operations
+ */
+export class ApiError extends Error {
+  constructor(
+    message: string, 
+    public code?: string, 
+    public details?: any
+  ) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
 
 /**
  * Maps frontend TestResult object to database format
+ * @param resultData Frontend test result data
+ * @returns Database-formatted test result object
  */
 function mapToDbFormat(resultData: TestResult) {
   // Generate a complete DB format object and validate values
@@ -18,12 +35,13 @@ function mapToDbFormat(resultData: TestResult) {
     dominant_type: resultData.dominantType || "logical"
   };
   
-  console.log("[Supabase] Mapped data:", dbData);
   return dbData;
 }
 
 /**
  * Maps database result back to frontend TestResult format
+ * @param dbResult Database result object
+ * @returns Frontend-formatted test result object
  */
 function mapFromDbFormat(dbResult: any): TestResult {
   return {
@@ -38,16 +56,15 @@ function mapFromDbFormat(dbResult: any): TestResult {
   };
 }
 
-// Save test result to Supabase
+/**
+ * Save test result to Supabase
+ * @param resultData Test result data to save
+ * @returns Object with success status and data or error
+ */
 export async function saveTestResult(resultData: TestResult) {
   try {
-    console.log("[Supabase] Attempting to save test result:", resultData);
-    
     // Validate the data types before inserting
     const dbData = mapToDbFormat(resultData);
-    
-    console.log("[Supabase] Mapped data for DB:", dbData);
-    console.log("[Supabase] Using URL:", import.meta.env.VITE_SUPABASE_URL);
     
     // Ensure date is a valid ISO string
     if (!dbData.date) {
@@ -62,26 +79,28 @@ export async function saveTestResult(resultData: TestResult) {
       delete dbData.id; // Remove empty ID to let Supabase generate one
     }
     
-    console.log("[Supabase] Sending data to Supabase...");
     const { data, error } = await supabase
-      .from('test_results')
+      .from(SUPABASE_TABLES.testResults)
       .insert(dbData)
       .select();
     
     if (error) {
-      console.error("[Supabase] Insert error details:", error);
+      console.error("Insert error details:", error);
       throw error;
     }
     
-    console.log("[Supabase] Successfully saved to Supabase:", data);
     return { success: true, data };
   } catch (error) {
-    console.error('[Supabase] Error saving test result:', error);
+    console.error('Error saving test result:', error);
     return { success: false, error };
   }
 }
 
-// Get all test results with filtering options
+/**
+ * Get all test results with filtering options
+ * @param filters Optional filters for the query
+ * @returns Object with success status and data or error
+ */
 export async function getAllTestResults(filters?: {
   studentClass?: string;
   startDate?: string;
@@ -91,7 +110,7 @@ export async function getAllTestResults(filters?: {
 }) {
   try {
     let query = supabase
-      .from('test_results')
+      .from(SUPABASE_TABLES.testResults)
       .select('*');
     
     // Apply filters if they exist
@@ -141,11 +160,15 @@ export async function getAllTestResults(filters?: {
   }
 }
 
-// Delete a test result
+/**
+ * Delete a test result
+ * @param id ID of the test result to delete
+ * @returns Object with success status and error if any
+ */
 export async function deleteTestResult(id: string) {
   try {
     const { error } = await supabase
-      .from('test_results')
+      .from(SUPABASE_TABLES.testResults)
       .delete()
       .eq('id', id);
     

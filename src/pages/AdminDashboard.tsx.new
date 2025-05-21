@@ -117,13 +117,9 @@ const AdminDashboard = () => {
     setError(null);
     
     try {
-      const { success, data, error } = await getAllTestResults();
-      if (success && data) {
-        setTestResults(data);
-        applyFiltersAndSort(data, filters, sortConfig);
-      } else {
-        throw error || new Error("Failed to fetch test results");
-      }
+      const results = await getAllTestResults();
+      setTestResults(results);
+      applyFiltersAndSort(results, filters, sortConfig);
       
       // Get unique classes for filter dropdown
       const classes = await getUniqueClasses();
@@ -141,7 +137,7 @@ const AdminDashboard = () => {
     setIsUpdatingProfile(true);
     
     try {
-      const { success } = await updateUserProfile(displayName);
+      const { success } = await updateUserProfile({ display_name: displayName });
       
       if (success) {
         localStorage.setItem("adminName", displayName);

@@ -1,14 +1,24 @@
 import { IntelligenceType, intelligenceTypes, intelligenceDescriptions } from './testQuestions';
 
-// Types for our test data
-export type TestResult = {
+/**
+ * Test result interface
+ */
+export interface TestResult {
+  /** Unique identifier for the test result */
   id: string;
+  /** Name of the test taker */
   name: string;
+  /** Age of the test taker */
   age: number;
+  /** Gender of the test taker */
   gender: string;
+  /** Class or group of the test taker */
   studentClass: string;
+  /** Date when the test was taken */
   date: string;
+  /** Scores for each intelligence type */
   results: Record<IntelligenceType, number>;
+  /** The dominant intelligence type based on scores */
   dominantType: IntelligenceType;
 };
 
@@ -72,8 +82,38 @@ export const intelligenceCharacteristics: Record<IntelligenceType, string[]> = {
   ]
 };
 
-// Transform data for visualization
-export const getChartData = (testResults: TestResult[]) => {  
+/**
+ * Chart data structure for visualization
+ */
+export interface ChartData {
+  /** Bar chart data for dominant intelligence types */
+  barChartData: {
+    labels: string[];
+    datasets: Array<{
+      label: string;
+      data: number[];
+      backgroundColor: string | string[];
+    }>;
+  };
+  /** Radar chart data for average intelligence scores */
+  radarData: {
+    labels: string[];
+    datasets: Array<{
+      label: string;
+      data: number[];
+      backgroundColor: string;
+      borderColor: string;
+      borderWidth: number;
+    }>;
+  };
+}
+
+/**
+ * Transform test results data into chart-ready formats
+ * @param testResults - Array of test results
+ * @returns Formatted data for charts
+ */
+export const getChartData = (testResults: TestResult[]): ChartData => {  
   // For bar chart - count occurrences of dominant types
   const dominantTypeCounts: Record<string, number> = {};
   
@@ -88,23 +128,34 @@ export const getChartData = (testResults: TestResult[]) => {
     dominantTypeCounts[type] = (dominantTypeCounts[type] || 0) + 1;
   });
   
-  // Prepare data for Chart.js bar chart
+  // Prepare data for Chart.js bar chart with consistent colors
   const barLabels = Object.keys(dominantTypeCounts);
   const barCounts = barLabels.map(type => dominantTypeCounts[type]);
   
+  const barColors = [
+    'rgba(99, 102, 241, 0.8)',   // Indigo
+    'rgba(16, 185, 129, 0.8)',   // Emerald
+    'rgba(239, 68, 68, 0.8)',    // Red
+    'rgba(245, 158, 11, 0.8)',   // Amber
+    'rgba(59, 130, 246, 0.8)',   // Blue
+    'rgba(139, 92, 246, 0.8)',   // Purple
+    'rgba(236, 72, 153, 0.8)',   // Pink
+    'rgba(5, 150, 105, 0.8)'     // Green
+  ];
+  
   const barChartData = {
-    labels: barLabels,
+    labels: barLabels.map(type => intelligenceTypes[type as IntelligenceType]),
     datasets: [
       {
         label: 'Jumlah',
         data: barCounts,
-        backgroundColor: 'rgba(136, 132, 216, 0.8)',
+        backgroundColor: barColors.slice(0, barLabels.length),
       }
     ]
   };
 
   // For radar chart - average scores across all participants
-  const totalScores = {
+  const totalScores: Record<IntelligenceType, number> = {
     linguistic: 0,
     logical: 0,
     musical: 0,
@@ -114,19 +165,31 @@ export const getChartData = (testResults: TestResult[]) => {
     intrapersonal: 0,
     naturalistic: 0
   };
+  
+  const resultsCount = testResults.length || 1; // Avoid division by zero
 
+  // Sum all scores
   testResults.forEach(result => {
-    totalScores.linguistic += result.results.linguistic;
-    totalScores.logical += result.results.logical;
-    totalScores.musical += result.results.musical;
-    totalScores.bodily += result.results.bodily;
-    totalScores.spatial += result.results.spatial;
-    totalScores.interpersonal += result.results.interpersonal;
-    totalScores.intrapersonal += result.results.intrapersonal;
-    totalScores.naturalistic += result.results.naturalistic;
+    Object.entries(result.results).forEach(([type, score]) => {
+      totalScores[type as IntelligenceType] += score;
+    });
   });
+  
+  // Calculate averages
+  const averageScores = Object.entries(totalScores).map(
+    ([_, total]) => Math.round(total / resultsCount)
+  );
  
-  const radarLabels = ["Linguistik", "Logis", "Musikal", "Kinestetik", "Spasial", "Interpersonal", "Intrapersonal", "Naturalistik"];
+  const radarLabels = [
+    "Linguistik", 
+    "Logis-Matematis", 
+    "Musikal", 
+    "Kinestetik", 
+    "Spasial", 
+    "Interpersonal", 
+    "Intrapersonal", 
+    "Naturalistik"
+  ];
   
   // For Chart.js radar chart
   const radarData = {
@@ -134,16 +197,7 @@ export const getChartData = (testResults: TestResult[]) => {
     datasets: [
       {
         label: 'Rata-rata Skor',
-        data: [
-          testResults.length > 0 ? totalScores.linguistic / testResults.length : 0,
-          testResults.length > 0 ? totalScores.logical / testResults.length : 0,
-          testResults.length > 0 ? totalScores.musical / testResults.length : 0,
-          testResults.length > 0 ? totalScores.bodily / testResults.length : 0,
-          testResults.length > 0 ? totalScores.spatial / testResults.length : 0,
-          testResults.length > 0 ? totalScores.interpersonal / testResults.length : 0,
-          testResults.length > 0 ? totalScores.intrapersonal / testResults.length : 0,
-          testResults.length > 0 ? totalScores.naturalistic / testResults.length : 0,
-        ],
+        data: averageScores,
         backgroundColor: 'rgba(136, 132, 216, 0.2)',
         borderColor: 'rgba(136, 132, 216, 1)',
         borderWidth: 1,

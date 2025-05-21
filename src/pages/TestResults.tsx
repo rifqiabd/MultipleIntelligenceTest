@@ -9,6 +9,8 @@ import { registerChartComponents } from "@/utils/chartConfig";
 import { PrinterIcon, HomeIcon } from "lucide-react";
 import { saveTestResult } from "@/integrations/supabase/api";
 import { useToast } from "@/components/ui/use-toast";
+import { formatDate } from "@/utils/formatters";
+import { STORAGE_KEYS, CHART_COLORS } from "@/utils/constants";
 
 // Register Chart.js components
 registerChartComponents();
@@ -22,7 +24,7 @@ const TestResults = () => {
   const { toast } = useToast();
   useEffect(() => {
     // Get test result from session storage
-    const resultData = sessionStorage.getItem("testResult");
+    const resultData = sessionStorage.getItem(STORAGE_KEYS.testResult);
 
     if (!resultData) {
       navigate("/test");
@@ -33,7 +35,7 @@ const TestResults = () => {
     setResult(parsedResult);
 
     // Check if already saved to Supabase
-    const savedToSupabase = sessionStorage.getItem("resultSavedToSupabase");
+    const savedToSupabase = sessionStorage.getItem(STORAGE_KEYS.resultSaved);
     if (savedToSupabase === "true") {
       setIsSaved(true);
     }
@@ -56,13 +58,13 @@ const TestResults = () => {
     
     try {
       // Clear session flag to ensure we don't think it's already saved
-      sessionStorage.removeItem("resultSavedToSupabase");
+      sessionStorage.removeItem(STORAGE_KEYS.resultSaved);
       
       const { success, error } = await saveTestResult(resultData);
 
       if (success) {
         console.log("[TestResults] Save successful!");
-        sessionStorage.setItem("resultSavedToSupabase", "true");
+        sessionStorage.setItem(STORAGE_KEYS.resultSaved, "true");
         setIsSaved(true);
         toast({
           title: "Hasil tersimpan",
@@ -90,20 +92,11 @@ const TestResults = () => {
 
   const handleReturnHome = () => {
     // Clear session data
-    sessionStorage.removeItem("userData");
-    sessionStorage.removeItem("testResult");
+    sessionStorage.removeItem(STORAGE_KEYS.userData);
+    sessionStorage.removeItem(STORAGE_KEYS.testResult);
 
     // Return to home page
     navigate("/");
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('id-ID', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    });
   };
 
   const handlePrint = () => {
@@ -131,8 +124,8 @@ const TestResults = () => {
       {
         label: 'Skor',
         data: Object.values(result.results),
-        backgroundColor: 'rgba(136, 132, 216, 0.6)',
-        borderColor: '#8884d8',
+        backgroundColor: CHART_COLORS.primary.background,
+        borderColor: CHART_COLORS.primary.border,
         borderWidth: 2,
       }
     ],
@@ -246,10 +239,10 @@ const TestResults = () => {
                         result.results.intrapersonal,
                         result.results.naturalistic,
                       ],
-                      backgroundColor: 'rgba(136, 132, 216, 0.2)',
-                      borderColor: 'rgba(136, 132, 216, 1)',
+                      backgroundColor: CHART_COLORS.primary.background,
+                      borderColor: CHART_COLORS.primary.border,
                       borderWidth: 1,
-                      pointBackgroundColor: 'rgba(136, 132, 216, 1)',
+                      pointBackgroundColor: CHART_COLORS.primary.border,
                     }
                   ]
                 }}

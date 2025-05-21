@@ -7,11 +7,19 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { STORAGE_KEYS } from "@/utils/constants";
 
-export type UserData = {
+/**
+ * User data interface for test entry
+ */
+export interface UserData {
+  /** Name of the test taker */
   name: string;
+  /** Age of the test taker */
   age: number;
+  /** Gender of the test taker */
   gender: string;
+  /** Class/group of the test taker */
   studentClass: string;
 };
 
@@ -67,7 +75,7 @@ const TestEntryForm = () => {
     }
     
     // Store user data in session storage to use later
-    sessionStorage.setItem("userData", JSON.stringify(userData));
+    sessionStorage.setItem(STORAGE_KEYS.userData, JSON.stringify(userData));
     
     // Navigate to the test page
     navigate("/test/questions");

@@ -14,22 +14,24 @@ import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, Award, Clock, Brain, MoveRight, MoveLeft } from "lucide-react";
 import confetti from "canvas-confetti";
 
-// Shuffle array using Fisher-Yates algorithm
-const shuffleArray = <T,>(array: T[]): T[] => {
-  const newArray = [...array];
-  for (let i = newArray.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
-  }
-  return newArray;
-};
+// Import utility functions
+import { shuffleArray } from "@/utils/arrays";
+import { formatTime } from "@/utils/formatters";
+import { STORAGE_KEYS } from "@/utils/constants";
 
-type Answer = {
+/**
+ * Answer type for tracking user responses
+ */
+interface Answer {
   questionId: string;
   value: number;
   type: IntelligenceType;
-};
+}
 
+/**
+ * TestQuestions component
+ * Handles the test flow, questions, answers, and result calculation
+ */
 const TestQuestions = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [shuffledQuestions, setShuffledQuestions] = useState(questions);
@@ -52,23 +54,23 @@ const TestQuestions = () => {
     return () => clearInterval(timer);
   }, []);
   
-  // Fungsi untuk menyimpan hasil ke Supabase
+  /**
+   * Save test result to Supabase and handle response
+   * @param resultData Test result data to save
+   */
   const saveResultToSupabase = async (resultData: TestResult) => {
     setIsSaving(true);
     try {
-      console.log("Saving test result to Supabase:", resultData);
       const { success, error } = await saveTestResult(resultData);
       
       if (success) {
-        console.log("Test result saved successfully to Supabase");
         // Set flag untuk menunjukkan hasil sudah disimpan ke Supabase
-        sessionStorage.setItem("resultSavedToSupabase", "true");
+        sessionStorage.setItem(STORAGE_KEYS.resultSaved, "true");
         toast({
           title: "Hasil tersimpan",
           description: "Hasil tes berhasil disimpan ke database",
         });
       } else {
-        console.error("Failed to save test result to Supabase:", error);
         toast({
           title: "Penyimpanan hasil",
           description: "Hasil tes sedang disimpan di latar belakang",
@@ -81,9 +83,10 @@ const TestQuestions = () => {
     }
   };
   
+  // Load initial data and shuffle questions
   useEffect(() => {
     // Check if user data exists
-    const userData = sessionStorage.getItem("userData");
+    const userData = sessionStorage.getItem(STORAGE_KEYS.userData);
     if (!userData) {
       navigate("/test");
       return;
@@ -92,19 +95,18 @@ const TestQuestions = () => {
     // Shuffle questions to mix up the different types
     setShuffledQuestions(shuffleArray(questions));
   }, [navigate]);
-    useEffect(() => {
+  
+  // Update progress as user answers questions
+  useEffect(() => {
     // Update progress
     setProgress((currentQuestion / shuffledQuestions.length) * 100);
   }, [currentQuestion, shuffledQuestions.length]);
   
-  // Format waktu dalam format mm:ss
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
   
-  // Mendapatkan nilai jawaban yang dipilih untuk pertanyaan saat ini
+  /**
+   * Get the selected value for the current question
+   * @returns The selected answer value as a string
+   */
   const getCurrentSelectedValue = () => {
     const existingAnswer = answers.find(
       answer => answer.questionId === shuffledQuestions[currentQuestion].id
@@ -112,17 +114,29 @@ const TestQuestions = () => {
     return existingAnswer ? existingAnswer.value.toString() : currentAnswer;
   };
   
-  // Memeriksa apakah pertanyaan telah dijawab
+  /**
+   * Check if the current question has been answered
+   * @returns Boolean indicating if the question is answered
+   */
   const isQuestionAnswered = () => {
     return currentAnswer !== "0" || answers.some(
       answer => answer.questionId === shuffledQuestions[currentQuestion].id
     );
   };
   
+  /**
+   * Handle answer selection
+   * @param value Selected answer value
+   */
   const handleAnswer = (value: string) => {
     setCurrentAnswer(value);
   };
-    const handleNext = () => {
+  
+  /**
+   * Handle next question button click
+   * Saves current answer and moves to next question or calculates results
+   */
+  const handleNext = () => {
     // Save current answer
     const existingAnswerIndex = answers.findIndex(
       answer => answer.questionId === shuffledQuestions[currentQuestion].id
@@ -135,30 +149,34 @@ const TestQuestions = () => {
     };
     
     if (existingAnswerIndex >= 0) {
-      // Update jawaban yang sudah ada
+      // Update existing answer
       const updatedAnswers = [...answers];
       updatedAnswers[existingAnswerIndex] = answer;
       setAnswers(updatedAnswers);
     } else {
-      // Tambahkan jawaban baru
+      // Add new answer
       setAnswers([...answers, answer]);
     }
     
     // Move to next question or complete test
     if (currentQuestion < shuffledQuestions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
-      setCurrentAnswer("0"); // Reset untuk pertanyaan berikutnya
+      setCurrentAnswer("0"); // Reset for next question
     } else {
       // Calculate results
       calculateResults();
     }
   };
   
+  /**
+   * Handle previous question button click
+   * Moves to previous question and restores previous answer
+   */
   const handlePrevious = () => {
     if (currentQuestion > 0) {
       setCurrentQuestion(currentQuestion - 1);
       
-      // Set jawaban dari pertanyaan sebelumnya jika ada
+      // Set answer from previous question if it exists
       const previousAnswer = answers.find(
         answer => answer.questionId === shuffledQuestions[currentQuestion - 1].id
       );
@@ -170,10 +188,15 @@ const TestQuestions = () => {
       }
     }
   };
-    const calculateResults = () => {
+  
+  /**
+   * Calculate test results and save to storage
+   * Shows confetti animation and navigates to results page
+   */
+  const calculateResults = () => {
     setIsSubmitting(true);
     
-    // Tampilkan animasi konfetti saat selesai
+    // Show confetti animation
     confetti({
       particleCount: 100,
       spread: 70,
@@ -181,7 +204,7 @@ const TestQuestions = () => {
     });
     
     // Get user data
-    const userData = JSON.parse(sessionStorage.getItem("userData") || "{}") as UserData;
+    const userData = JSON.parse(sessionStorage.getItem(STORAGE_KEYS.userData) || "{}") as UserData;
     
     // Calculate scores for each intelligence type
     const scores: Record<IntelligenceType, number> = {
@@ -245,10 +268,10 @@ const TestQuestions = () => {
       dominantType
     };
     
-    // Simpan hasil ke sessionStorage
-    sessionStorage.setItem("testResult", JSON.stringify(result));
+    // Save result to sessionStorage
+    sessionStorage.setItem(STORAGE_KEYS.testResult, JSON.stringify(result));
     
-    // Simpan hasil langsung ke Supabase
+    // Save result directly to Supabase
     saveResultToSupabase(result);
     
     // Navigate to results page
@@ -261,13 +284,13 @@ const TestQuestions = () => {
   }
 
   const question = shuffledQuestions[currentQuestion];
-  // Hitung jumlah total pertanyaan yang sudah dijawab
+  // Count total answered questions
   const totalAnswered = answers.length;
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50 to-blue-50 py-8 px-1">
       <div className="container mx-auto max-w-3xl">
-        {/* Header dengan statistik */}
+        {/* Header with statistics */}
         <div className="flex items-center justify-between mb-4 text-sm text-gray-600">
           <div className="flex items-center">
             <Brain className="h-4 w-4 mr-1 text-purple-500" />
