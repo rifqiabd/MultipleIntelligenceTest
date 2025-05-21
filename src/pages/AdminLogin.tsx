@@ -77,6 +77,7 @@ const AdminLogin = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                autoComplete="username email"
               />
             </div>
             <div className="space-y-2">
@@ -87,6 +88,7 @@ const AdminLogin = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                autoComplete="current-password"
               />
             </div>
           </CardContent>          <CardFooter className="flex flex-col gap-4">

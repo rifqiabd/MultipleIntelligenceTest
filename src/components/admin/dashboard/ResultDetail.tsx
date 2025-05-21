@@ -1,7 +1,7 @@
 import { TestResult, intelligenceCharacteristics } from "@/data/testResultsTypes";
 import { intelligenceTypes, intelligenceDescriptions, IntelligenceType } from "@/data/testQuestions";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Radar } from 'react-chartjs-2';
 import { FC } from "react";
 
@@ -19,6 +19,9 @@ const ResultDetail: FC<ResultDetailProps> = ({ isOpen, onOpenChange, result }) =
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle>Detail Hasil Tes</DialogTitle>
+          <DialogDescription>
+            Informasi lengkap tentang hasil tes kecerdasan majemuk siswa.
+          </DialogDescription>
         </DialogHeader>
         <ScrollArea className="h-[calc(90vh-120px)]">
           <div className="p-4 space-y-6">

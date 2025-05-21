@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { FC } from "react";
 
 interface ProfileUpdateProps {
@@ -28,6 +28,9 @@ const ProfileUpdate: FC<ProfileUpdateProps> = ({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Perbarui Profil</DialogTitle>
+          <DialogDescription>
+            Ubah informasi profil admin yang akan ditampilkan pada dashboard.
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div>

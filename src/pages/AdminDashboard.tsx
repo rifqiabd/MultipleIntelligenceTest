@@ -77,23 +77,38 @@ const AdminDashboard = () => {
       greetingText = "Selamat malam";
     }
 
-    // Get admin name from localStorage if available
-    const adminName = localStorage.getItem("adminName") || "Admin";
-    
-    return `${greetingText}, ${adminName}!`;
+    // Use displayName from state that comes from Supabase Auth
+    return `${greetingText}, ${displayName || "Admin"}!`;
   };
   
   // Load current user data
   const loadUserData = async () => {
-    const { success, user } = await getCurrentUser();
-    if (success && user) {
-      // Set display name from user metadata if available
-      const savedName = user.user_metadata?.display_name || localStorage.getItem("adminName") || "Admin";
-      setDisplayName(savedName);
-      setUserEmail(user.email || "");
-      localStorage.setItem("adminName", savedName);
-    } else {
-      // If getting current user fails, redirect to login
+    try {
+      // Periksa status login di localStorage terlebih dahulu
+      const isLoggedIn = localStorage.getItem("isAdminLoggedIn") === "true";
+      if (!isLoggedIn) {
+        // Jika tidak login, redirect ke halaman login
+        navigate("/admin/login");
+        return;
+      }
+      
+      const { success, user } = await getCurrentUser();
+      if (success && user) {
+        // Set display name directly from user metadata in Supabase
+        const adminName = user.user_metadata?.display_name || user.email?.split('@')[0] || "Admin";
+        setDisplayName(adminName);
+        setUserEmail(user.email || "");
+        // Update greeting after getting user data
+        setGreeting(`${generateGreeting()}`);
+      } else {
+        // If getting current user fails, clear localStorage and redirect to login
+        localStorage.removeItem("isAdminLoggedIn");
+        navigate("/admin/login");
+      }
+    } catch (error) {
+      console.error("Error loading user data:", error);
+      // If error occurs, clear localStorage and redirect to login
+      localStorage.removeItem("isAdminLoggedIn");
       navigate("/admin/login");
     }
   };
@@ -172,8 +187,13 @@ const AdminDashboard = () => {
   // Handle logout
   const handleLogout = async () => {
     const { success } = await signOut();
+    
+    // Hapus semua data admin dari localStorage
+    localStorage.removeItem("isAdminLoggedIn");
+    localStorage.removeItem("adminName");
+    
     if (success) {
-      navigate("/admin/login");
+      navigate("/");
     } else {
       toast({
         title: "Gagal keluar",
