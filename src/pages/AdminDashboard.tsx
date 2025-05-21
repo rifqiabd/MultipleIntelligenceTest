@@ -62,8 +62,8 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Generate greeting based on time of day
-  const generateGreeting = () => {
+  // Ubah generateGreeting agar bisa menerima nama (opsional)
+  const generateGreeting = (name?: string) => {
     const currentHour = new Date().getHours();
     let greetingText = "";
 
@@ -77,8 +77,7 @@ const AdminDashboard = () => {
       greetingText = "Selamat malam";
     }
 
-    // Use displayName from state that comes from Supabase Auth
-    return `${greetingText}, ${displayName || "Admin"}!`;
+    return `${greetingText}, ${name || "Admin"}!`;
   };
   
   // Load current user data
@@ -98,8 +97,6 @@ const AdminDashboard = () => {
         const adminName = user.user_metadata?.display_name || user.email?.split('@')[0] || "Admin";
         setDisplayName(adminName);
         setUserEmail(user.email || "");
-        // Update greeting after getting user data
-        setGreeting(`${generateGreeting()}`);
       } else {
         // If getting current user fails, clear localStorage and redirect to login
         localStorage.removeItem("isAdminLoggedIn");
@@ -377,6 +374,10 @@ const AdminDashboard = () => {
       clearInterval(refreshInterval);
     };
   }, []);
+
+  useEffect(() => {
+    setGreeting(generateGreeting(displayName));
+  }, [displayName]);
 
   return (
     <div className="min-h-screen bg-gray-50 px-2 sm:px-4 md:px-6">
