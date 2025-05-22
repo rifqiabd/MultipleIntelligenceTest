@@ -124,7 +124,7 @@ const Index = () => {
       </header>
 
       {/* HERO SECTION */}
-      <section className="w-full max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between px-4 gap-12 min-h-screen pt-32 md:pt-28" style={{ minHeight: '100vh' }}>
+      <section className="w-full max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between px-4 gap-12 min-h-screen pt-32 md:pt-10" style={{ minHeight: '100vh' }}>
         <div className="flex-1 text-center md:text-left">
           <motion.h1
             initial={{ opacity: 0, y: -30 }}
@@ -169,22 +169,22 @@ const Index = () => {
           transition={{ delay: 0.3, duration: 0.7 }}
           className="flex-1 flex items-center justify-center"
         >
-          <div className="grid grid-cols-4 gap-4 bg-white/90 rounded-2xl p-8 shadow-2xl border border-purple-100">
+          <div className="grid grid-cols-4 gap-10 bg-white/90 rounded-2xl p-12 shadow-2xl border border-purple-100">
             {/* Intelligence icons */}
-            <span className="text-4xl">📚</span>
-            <span className="text-4xl">🧮</span>
-            <span className="text-4xl">🎵</span>
-            <span className="text-4xl">🏃</span>
-            <span className="text-4xl">🎨</span>
-            <span className="text-4xl">👥</span>
-            <span className="text-4xl">🧠</span>
-            <span className="text-4xl">🌿</span>
+            <span className="text-6xl">📚</span>
+            <span className="text-6xl">🧮</span>
+            <span className="text-6xl">🎵</span>
+            <span className="text-6xl">🏃</span>
+            <span className="text-6xl">🎨</span>
+            <span className="text-6xl">👥</span>
+            <span className="text-6xl">🧠</span>
+            <span className="text-6xl">🌿</span>
           </div>
         </motion.div>
       </section>
 
       {/* FEATURES SECTION */}
-      <section id="features" className="w-full max-w-5xl mx-auto py-12 px-4">
+      <section id="features" className="w-full min-h-screen max-w-5xl mx-auto py-12 px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {features.map((f, i) => (
             <motion.div
@@ -193,7 +193,7 @@ const Index = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 * i, duration: 0.5 }}
-              className="bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center text-center border-t-4 border-purple-200 hover:border-indigo-400 transition-all duration-300"
+              className="bg-white rounded-2xl shadow-lg p-12 flex flex-col items-center text-center border-t-4 border-purple-200 hover:border-indigo-400 transition-all duration-300"
             >
               <div className="text-5xl mb-4">{f.icon}</div>
               <div className="font-bold text-lg text-purple-700 mb-2">{f.title}</div>
