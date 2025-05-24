@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,6 +12,8 @@ import TestEntryForm from "./pages/TestEntryForm";
 import TestQuestions from "./pages/TestQuestions";
 import TestResults from "./pages/TestResults";
 import NotFound from "./pages/NotFound";
+import MakasihYa from "./pages/MakasihYa";
+import KeyboardListener from "./components/KeyboardListener";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +23,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <KeyboardListener />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/admin" element={<AdminLogin />} />
@@ -29,6 +31,7 @@ const App = () => (
           <Route path="/test" element={<TestEntryForm />} />
           <Route path="/test/questions" element={<TestQuestions />} />
           <Route path="/test/results" element={<TestResults />} />
+          <Route path="/makasihya" element={<MakasihYa />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

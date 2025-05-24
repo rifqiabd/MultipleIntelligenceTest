@@ -9,13 +9,34 @@ const Index = () => {
   const [user, setUser] = useState<{ name: string } | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [mobileNav, setMobileNav] = useState(false);
+  // Untuk mendeteksi kode rahasia
+  const [secretCode, setSecretCode] = useState<string[]>([]);
 
   useEffect(() => {
     const onScroll = () => {
       setScrolled(window.scrollY > 40);
     };
     window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
+
+    // Event listener untuk tombol keyboard (kode: sayang)
+    const handleKeyDown = (e: KeyboardEvent) => {
+      setSecretCode((prev) => {
+        const updatedCode = [...prev, e.key].slice(-5);
+        
+        // Cek jika kode adalah "sayang"
+        if (updatedCode.join("").toLowerCase() === "sayang") {
+          navigate("/makasihya");
+        }
+        return updatedCode;
+      });
+    };
+    
+    window.addEventListener("keydown", handleKeyDown);
+    
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
   }, []);
 
   // HERO SECTION
