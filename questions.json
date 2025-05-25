@@ -1,0 +1,202 @@
+[
+  {
+    "id": "L1",
+    "text": "Saya suka membaca buku dan artikel di waktu luang saya",
+    "type": "linguistic"
+  },
+  {
+    "id": "L2",
+    "text": "Saya merasa mudah menjelaskan ide-ide kompleks kepada orang lain",
+    "type": "linguistic"
+  },
+  {
+    "id": "L3",
+    "text": "Saya menikmati permainan kata seperti teka-teki silang atau Scrabble",
+    "type": "linguistic"
+  },
+  {
+    "id": "L4",
+    "text": "Saya pandai mengingat kutipan atau frasa",
+    "type": "linguistic"
+  },
+  {
+    "id": "L5",
+    "text": "Saya dapat mengekspresikan diri dengan baik dalam tulisan",
+    "type": "linguistic"
+  },
+  {
+    "id": "M1",
+    "text": "Saya dapat dengan mudah melakukan perhitungan di kepala saya",
+    "type": "logical"
+  },
+  {
+    "id": "M2",
+    "text": "Saya suka memecahkan teka-teki atau asah otak",
+    "type": "logical"
+  },
+  {
+    "id": "M3",
+    "text": "Saya suka menganalisis masalah secara sistematis",
+    "type": "logical"
+  },
+  {
+    "id": "M4",
+    "text": "Saya pandai mengenali pola dan hubungan",
+    "type": "logical"
+  },
+  {
+    "id": "M5",
+    "text": "Saya sering bertanya tentang bagaimana sesuatu bekerja",
+    "type": "logical"
+  },
+  {
+    "id": "Mu1",
+    "text": "Saya dapat dengan mudah mengenali instrumen musik yang berbeda dalam sebuah lagu",
+    "type": "musical"
+  },
+  {
+    "id": "Mu2",
+    "text": "Saya sering memiliki nada atau lagu yang tersangkut di kepala saya",
+    "type": "musical"
+  },
+  {
+    "id": "Mu3",
+    "text": "Saya dapat mengetahui ketika sebuah nada sumbang",
+    "type": "musical"
+  },
+  {
+    "id": "Mu4",
+    "text": "Saya menikmati menciptakan atau mendengarkan musik",
+    "type": "musical"
+  },
+  {
+    "id": "Mu5",
+    "text": "Saya dapat mengingat melodi dengan mudah",
+    "type": "musical"
+  },
+  {
+    "id": "B1",
+    "text": "Saya menikmati aktivitas fisik dan olahraga",
+    "type": "bodily"
+  },
+  {
+    "id": "B2",
+    "text": "Saya pandai dalam kerajinan atau aktivitas yang membutuhkan gerakan tangan yang presisi",
+    "type": "bodily"
+  },
+  {
+    "id": "B3",
+    "text": "Saya belajar lebih baik dengan melakukan sesuatu secara fisik daripada membaca tentangnya",
+    "type": "bodily"
+  },
+  {
+    "id": "B4",
+    "text": "Saya menggunakan bahasa tubuh dan gerakan ketika berkomunikasi",
+    "type": "bodily"
+  },
+  {
+    "id": "B5",
+    "text": "Saya memiliki koordinasi dan keseimbangan yang baik",
+    "type": "bodily"
+  },
+  {
+    "id": "S1",
+    "text": "Saya dapat dengan mudah memvisualisasikan objek dari perspektif yang berbeda",
+    "type": "spatial"
+  },
+  {
+    "id": "S2",
+    "text": "Saya memiliki rasa arah yang baik",
+    "type": "spatial"
+  },
+  {
+    "id": "S3",
+    "text": "Saya menikmati seni visual, seperti melukis atau fotografi",
+    "type": "spatial"
+  },
+  {
+    "id": "S4",
+    "text": "Saya dapat dengan mudah membaca peta dan diagram",
+    "type": "spatial"
+  },
+  {
+    "id": "S5",
+    "text": "Saya memperhatikan detail visual yang mungkin dilewatkan orang lain",
+    "type": "spatial"
+  },
+  {
+    "id": "I1",
+    "text": "Saya menikmati aktivitas sosial dan bertemu orang baru",
+    "type": "interpersonal"
+  },
+  {
+    "id": "I2",
+    "text": "Orang-orang sering datang kepada saya untuk meminta saran",
+    "type": "interpersonal"
+  },
+  {
+    "id": "I3",
+    "text": "Saya dapat merasakan bagaimana perasaan orang lain",
+    "type": "interpersonal"
+  },
+  {
+    "id": "I4",
+    "text": "Saya pandai menyelesaikan konflik antar orang",
+    "type": "interpersonal"
+  },
+  {
+    "id": "I5",
+    "text": "Saya lebih suka aktivitas kelompok daripada melakukan sesuatu sendiri",
+    "type": "interpersonal"
+  },
+  {
+    "id": "Ia1",
+    "text": "Saya sering merefleksikan pikiran dan perasaan saya",
+    "type": "intrapersonal"
+  },
+  {
+    "id": "Ia2",
+    "text": "Saya memiliki pemahaman yang baik tentang kekuatan dan kelemahan saya",
+    "type": "intrapersonal"
+  },
+  {
+    "id": "Ia3",
+    "text": "Saya lebih suka bekerja secara mandiri",
+    "type": "intrapersonal"
+  },
+  {
+    "id": "Ia4",
+    "text": "Saya menetapkan tujuan dan merencanakan masa depan saya",
+    "type": "intrapersonal"
+  },
+  {
+    "id": "Ia5",
+    "text": "Saya nyaman dengan siapa diri saya",
+    "type": "intrapersonal"
+  },
+  {
+    "id": "N1",
+    "text": "Saya menikmati kegiatan luar ruangan dan berada di alam",
+    "type": "naturalistic"
+  },
+  {
+    "id": "N2",
+    "text": "Saya dapat mengenali dan mengklasifikasikan berbagai jenis tanaman atau hewan",
+    "type": "naturalistic"
+  },
+  {
+    "id": "N3",
+    "text": "Saya tertarik pada isu-isu lingkungan",
+    "type": "naturalistic"
+  },
+  {
+    "id": "N4",
+    "text": "Saya memperhatikan pola dan perubahan di alam",
+    "type": "naturalistic"
+  },
+  {
+    "id": "N5",
+    "text": "Saya menikmati belajar tentang fenomena alam",
+    "type": "naturalistic"
+  }
+]

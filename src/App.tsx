@@ -8,6 +8,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminQuestions from "./pages/AdminQuestions";
 import TestEntryForm from "./pages/TestEntryForm";
 import TestQuestions from "./pages/TestQuestions";
 import TestResults from "./pages/TestResults";
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/questions" element={<AdminQuestions />} />
           <Route path="/test" element={<TestEntryForm />} />
           <Route path="/test/questions" element={<TestQuestions />} />
           <Route path="/test/results" element={<TestResults />} />

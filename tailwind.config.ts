@@ -10,6 +10,14 @@ export default {
 	],
 	prefix: "",
 	theme: {
+		screens: {
+			'xs': '480px',
+			'sm': '640px',
+			'md': '768px',
+			'lg': '1024px',
+			'xl': '1280px',
+			'2xl': '1536px',
+		},
 		container: {
 			center: true,
 			padding: '2rem',
@@ -92,5 +100,35 @@ export default {
 			}
 		}
 	},
-	plugins: [require("tailwindcss-animate")],
+	plugins: [
+		require("tailwindcss-animate"),
+		function({ addUtilities }) {
+			addUtilities({
+				'.hide-scrollbar': {
+					'scrollbarWidth': 'none',
+					'-ms-overflow-style': 'none',
+					'&::-webkit-scrollbar': {
+						display: 'none'
+					}
+				},
+				'.scrollbar-thin': {
+					'scrollbarWidth': 'thin',
+					'&::-webkit-scrollbar': {
+						width: '6px',
+						height: '6px'
+					},
+					'&::-webkit-scrollbar-track': {
+						background: 'transparent'
+					},
+					'&::-webkit-scrollbar-thumb': {
+						background: '#d1d5db',
+						borderRadius: '20px'
+					},
+					'&::-webkit-scrollbar-thumb:hover': {
+						background: '#9ca3af'
+					}
+				}
+			});
+		}
+	],
 } satisfies Config;

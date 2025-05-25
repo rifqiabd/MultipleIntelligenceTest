@@ -390,6 +390,7 @@ const AdminDashboard = () => {
           resultCount={resultCount}
           onProfileClick={() => setProfileModalOpen(true)}
           onLogoutClick={handleLogout}
+          onQuestionsClick={() => navigate('/admin/questions')}
         />
 
         {/* Quick Stats */}
