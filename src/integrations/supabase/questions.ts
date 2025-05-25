@@ -6,55 +6,20 @@ import { ApiError } from './api';
 const QUESTIONS_TABLE = 'table_questions';
 
 /**
- * Try fetching from alternative table names in case the main one doesn't exist
- * @returns Data and error from Supabase
- */
-async function tryFetchFromPossibleTables() {
-  // Possible table names in order of priority
-  const possibleTableNames = [
-    'table_questions',   // Provided name
-    'test_questions',    // Name from setup files
-    'questions'          // Simplified name
-  ];
-  
-  // Try each table name until one works
-  for (const tableName of possibleTableNames) {
-    console.log(`Attempting to fetch from table: ${tableName}`);
-    
-    const { data, error } = await supabase
-      .from(tableName)
-      .select('*')
-      .order('type')
-      .order('id');
-      
-    if (!error) {
-      // If successful, update the constant for future use
-      console.log(`Successfully fetched from table: ${tableName}`);
-      return { data, error, tableName };
-    }
-    
-    console.log(`Table ${tableName} check result:`, error ? 'Error' : 'Success');
-  }
-  
-  // If all fail, return the error from the first attempt
-  const { data, error } = await supabase
-    .from(QUESTIONS_TABLE)
-    .select('*');
-    
-  return { data, error, tableName: QUESTIONS_TABLE };
-}
-
-/**
  * Get all questions
  * @returns Promise with questions data
  */
 export async function getAllQuestions() {
   try {
-    console.log('Attempting to fetch questions from Supabase...');
-    const { data, error, tableName } = await tryFetchFromPossibleTables();
+    console.log('Fetching questions from Supabase table:', QUESTIONS_TABLE);
+    const { data, error } = await supabase
+      .from(QUESTIONS_TABLE)
+      .select('*')
+      .order('type')
+      .order('id');
 
     if (error) {
-      console.error(`Supabase error when fetching questions from ${tableName}:`, error);
+      console.error('Supabase error when fetching questions:', error);
       throw new ApiError(error.message, error.code);
     }
     

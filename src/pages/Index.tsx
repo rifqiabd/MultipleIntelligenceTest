@@ -94,7 +94,8 @@ const Index = () => {
           </div>
           {/* Desktop Nav */}
           <nav className="hidden md:flex gap-8 text-base font-medium">
-            <a href="#features" className="text-gray-700 hover:text-purple-700 transition">Fitur</a>
+            <a href="#home" className="text-gray-70 0 hover:text-purple-700 transition">Beranda</a>
+            <a href="#features" className="text-gray-70 0 hover:text-purple-700 transition">Fitur</a>
             <a href="#how" className="text-gray-700 hover:text-purple-700 transition">Cara Kerja</a>
             <a href="#testimonials" className="text-gray-700 hover:text-purple-700 transition">Testimoni</a>
           </nav>
@@ -127,6 +128,7 @@ const Index = () => {
         {/* Mobile Nav Drawer */}
         {mobileNav && (
           <div className="md:hidden bg-white/95 shadow-lg border-t border-purple-100 px-6 py-6 flex flex-col gap-4 text-base font-medium animate-fade-in-down">
+            <a href="#home" className="text-gray-700 hover:text-purple-700 transition" onClick={() => setMobileNav(false)}>Beranda</a>
             <a href="#features" className="text-gray-700 hover:text-purple-700 transition" onClick={() => setMobileNav(false)}>Fitur</a>
             <a href="#how" className="text-gray-700 hover:text-purple-700 transition" onClick={() => setMobileNav(false)}>Cara Kerja</a>
             <a href="#testimonials" className="text-gray-700 hover:text-purple-700 transition" onClick={() => setMobileNav(false)}>Testimoni</a>
@@ -145,7 +147,7 @@ const Index = () => {
       </header>
 
       {/* HERO SECTION */}
-      <section className="w-full max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between px-4 gap-12 min-h-screen pt-32 md:pt-10" style={{ minHeight: '100vh' }}>
+      <section id="home" className="w-full max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between px-4 gap-12 min-h-screen pt-32 md:pt-10" style={{ minHeight: '100vh' }}>
         <div className="flex-1 text-center md:text-left">
           <motion.h1
             initial={{ opacity: 0, y: -30 }}
@@ -205,7 +207,7 @@ const Index = () => {
       </section>
 
       {/* FEATURES SECTION */}
-      <section id="features" className="w-full min-h-screen max-w-5xl mx-auto py-12 px-4">
+      <section id="features" className="w-full min-h-screen max-w-5xl mx-auto my-20 py-20 px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {features.map((f, i) => (
             <motion.div
@@ -225,7 +227,7 @@ const Index = () => {
       </section>
 
       {/* HOW IT WORKS SECTION */}
-      <section id="how" className="w-full max-w-5xl mx-auto py-16 px-4">
+      <section id="how" className="w-full min-h-screen max-w-5xl mx-auto py-20 px-4">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
