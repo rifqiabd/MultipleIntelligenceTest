@@ -90,7 +90,6 @@ const Index = () => {
           {/* Logo */}
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}> 
             <span className="bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center text-white text-sm font-black md:text-xl shadow-md px-4 py-1">Multiple Intelegences Test</span>
-            <span className="text-sm font-extralight md:text-sm text-purple-700 tracking-tight">by Dewi Sinta</span>
           </div>
           {/* Desktop Nav */}
           <nav className="hidden md:flex gap-8 text-base font-medium">
@@ -280,9 +279,8 @@ const Index = () => {
 
       {/* FOOTER */}
       <footer className="w-full text-center text-xs text-gray-500 py-8 border-t border-gray-200 mt-auto bg-white/70">
-        <div>© {new Date().getFullYear()} Tes Kecerdasan Majemuk</div>
-        <div className="mt-1">Berdasarkan teori Howard Gardner</div>
-        <div className="mt-1">by Dewi Sinta</div>
+        <div>© {new Date().getFullYear()} Made with 💖 in PPTQA | Tes Kecerdasan Majemuk Berdasarkan teori Howard Gardner</div>
+        <div className="mt-1">Created for Dewi Sinta</div>
       </footer>
     </div>
   );
