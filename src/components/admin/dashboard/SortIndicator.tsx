@@ -34,31 +34,25 @@ const SortIndicator: FC<SortIndicatorProps> = ({ sortConfig, resetSort }) => {
   if (!sortConfig.key) return null;
 
   return (
-    <div className="px-6 pb-2">
-      {/* Sort indicator */}
-      <div className="flex items-center bg-purple-50 p-2 rounded-md mb-4">
-        <ArrowUpDown className="h-4 w-4 text-purple-600 mr-2" />
-        <span className="text-sm text-purple-700">
-          Diurutkan berdasarkan: <span className="font-medium">
-            {getSortKeyLabel(sortConfig.key)}
-          </span> ({sortConfig.direction === 'ascending' ? 'Naik' : 'Turun'})
-        </span>
+    <div className="mt-3">
+      {/* Simplified Sort indicator */}
+      <div className="flex items-center justify-between text-xs text-gray-600 border-t pt-2">
+        <div className="flex items-center">
+          <ArrowUpDown className="h-3 w-3 mr-1 text-purple-600" />
+          <span>
+            Diurut: {getSortKeyLabel(sortConfig.key)} • {sortConfig.direction === 'ascending' ? 'Naik' : 'Turun'}
+          </span>
+        </div>
         <Button 
           variant="ghost" 
           size="sm" 
-          className="ml-auto h-8 w-8 p-0" 
+          className="h-5 w-5 p-0 rounded-full hover:bg-purple-50" 
           onClick={resetSort}
+          title="Reset pengurutan"
         >
           <span className="sr-only">Reset urutan</span>
-          <Trash className="h-4 w-4 text-purple-600" />
+          <Trash className="h-3 w-3 text-purple-500" />
         </Button>
-      </div>
-      
-      {/* Sorting instruction */}
-      <div className="bg-blue-50 border-l-4 border-blue-400 p-2.5 mb-4 flex items-center">
-        <div className="text-blue-700 text-sm">
-          <span className="font-semibold">Tip:</span> Klik pada header tabel untuk mengurutkan data. Klik sekali lagi untuk mengubah urutan.
-        </div>
       </div>
     </div>
   );

@@ -401,29 +401,31 @@ const ExportButtons: FC<ExportButtonsProps> = ({ testResults }) => {
   };
 
   return (
-    <div className="flex flex-wrap items-center justify-end gap-3 pt-4 pb-2">
-      {/* Data count badge with improved styling */}
-      <div className="mr-2 text-xs font-medium bg-gray-100 text-gray-700 px-3 py-1 rounded-full border border-gray-200 shadow-sm">
-        {hasData ? (
-          <span className="flex items-center">
-            <span className="w-2 h-2 bg-green-500 rounded-full mr-1.5"></span>
-            {testResults.length} data siap export
-          </span>
-        ) : (
-          <span className="flex items-center">
-            <span className="w-2 h-2 bg-red-500 rounded-full mr-1.5"></span>
-            Tidak ada data
-          </span>
-        )}
+    <div>
+      <div className="flex items-center mb-3">
+        <h3 className="text-sm font-medium text-gray-700">Export Data</h3>
+        <div className="ml-3 text-xs font-medium bg-gray-100 text-gray-700 px-2.5 py-1 rounded-full border border-gray-200">
+          {hasData ? (
+            <span className="flex items-center">
+              <span className="w-2 h-2 bg-green-500 rounded-full mr-1.5"></span>
+              {testResults.length} data siap export
+            </span>
+          ) : (
+            <span className="flex items-center">
+              <span className="w-2 h-2 bg-red-500 rounded-full mr-1.5"></span>
+              Tidak ada data
+            </span>
+          )}
+        </div>
       </div>
       
-      <p className="text-sm font-medium text-gray-600">Export data sebagai:</p>
+      <p className="text-sm mb-2 text-gray-600">Pilih format export:</p>
       
       <div className="flex flex-wrap gap-2">
         <Button
           variant="outline"
           size="sm"
-          className="bg-white hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all duration-200 transform hover:-translate-y-0.5 shadow-sm hover:shadow active:translate-y-0"
+          className="bg-white hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm"
           onClick={handleExportToCsv}
           disabled={!hasData || isExporting.csv}
           title={hasData ? `Export ${testResults.length} data ke CSV` : "Tidak ada data untuk diexport"}
@@ -436,7 +438,7 @@ const ExportButtons: FC<ExportButtonsProps> = ({ testResults }) => {
         <Button
           variant="outline"
           size="sm"
-          className="bg-white hover:bg-green-50 hover:text-green-600 hover:border-green-200 transition-all duration-200 transform hover:-translate-y-0.5 shadow-sm hover:shadow active:translate-y-0"
+          className="bg-white hover:bg-green-50 hover:text-green-600 hover:border-green-200 transition-all shadow-sm"
           onClick={handleExportToExcel}
           disabled={!hasData || isExporting.excel}
           title={hasData ? `Export ${testResults.length} data ke Excel` : "Tidak ada data untuk diexport"}
@@ -449,7 +451,7 @@ const ExportButtons: FC<ExportButtonsProps> = ({ testResults }) => {
         <Button
           variant="outline"
           size="sm"
-          className="bg-white hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all duration-200 transform hover:-translate-y-0.5 shadow-sm hover:shadow active:translate-y-0"
+          className="bg-white hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all shadow-sm"
           onClick={handleExportToPdf}
           disabled={!hasData || isExporting.pdf}
           title={hasData ? `Export ${testResults.length} data ke PDF${testResults.length > 30 ? ' (multi-halaman)' : ''}` : "Tidak ada data untuk diexport"}

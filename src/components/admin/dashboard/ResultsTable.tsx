@@ -1,10 +1,19 @@
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { TestResult } from "@/data/testResultsTypes";
 import { intelligenceTypes, IntelligenceType } from "@/data/testQuestions";
 import { Eye, Trash, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
-import { FC } from "react";
+import { FC, useState, useEffect } from "react";
 
 interface ResultsTableProps {
   testResults: TestResult[];
@@ -30,8 +39,64 @@ const ResultsTable: FC<ResultsTableProps> = ({
   isLoading,
   onRetry
 }) => {
+  // Pagination logic
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
+  
+  // Calculate pagination values
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = testResults.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(testResults.length / itemsPerPage);
+  
+  // Reset to first page when test results change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [testResults.length]);
+  
+  // Function to change page
+  const paginate = (pageNumber: number) => {
+    if (pageNumber > 0 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber);
+    }
+  };
+  
+  // Generate page numbers for pagination
+  const getPageNumbers = () => {
+    const pageNumbers: number[] = [];
+    const maxPagesToShow = 5; // Max number of page buttons to show
+    
+    if (totalPages <= maxPagesToShow) {
+      // Show all pages if they're fewer than maxPagesToShow
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
+      }
+    } else {
+      // Always show first page
+      pageNumbers.push(1);
+      
+      if (currentPage <= 3) {
+        // Near the beginning
+        pageNumbers.push(2, 3);
+        pageNumbers.push(-1); // Ellipsis
+        pageNumbers.push(totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        // Near the end
+        pageNumbers.push(-1); // Ellipsis
+        pageNumbers.push(totalPages - 2, totalPages - 1, totalPages);
+      } else {
+        // Somewhere in the middle
+        pageNumbers.push(-1); // Ellipsis
+        pageNumbers.push(currentPage - 1, currentPage, currentPage + 1);
+        pageNumbers.push(-1); // Ellipsis
+        pageNumbers.push(totalPages);
+      }
+    }
+    
+    return pageNumbers;
+  };
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto mt-3">
       <TooltipProvider>
         <Table>
           <TableHeader>
@@ -227,7 +292,7 @@ const ResultsTable: FC<ResultsTableProps> = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {testResults.map((result) => (
+            {currentItems.map((result) => (
               <TableRow key={result.id}>
                 <TableCell className="font-medium">{result.name}</TableCell>
                 <TableCell>{result.studentClass}</TableCell>
@@ -282,6 +347,57 @@ const ResultsTable: FC<ResultsTableProps> = ({
       {!isLoading && !error && testResults.length === 0 && (
         <div className="text-center py-8 text-gray-500">
           Belum ada data hasil tes.
+        </div>
+      )}
+      
+      {/* Pagination */}
+      {testResults.length > 0 && (
+        <div className="mt-4">
+          <div className="flex items-center justify-between text-sm text-gray-500 mb-2">
+            <div>
+              Menampilkan {indexOfFirstItem + 1}-{Math.min(indexOfLastItem, testResults.length)} dari {testResults.length} hasil
+            </div>
+            <div>
+              Halaman {currentPage} dari {totalPages}
+            </div>
+          </div>
+          
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious 
+                  onClick={() => paginate(currentPage - 1)} 
+                  className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  aria-disabled={currentPage === 1}
+                />
+              </PaginationItem>
+              
+              {getPageNumbers().map((number, idx) => (
+                number === -1 ? (
+                  <PaginationItem key={`ellipsis-${idx}`}>
+                    <PaginationEllipsis />
+                  </PaginationItem>
+                ) : (
+                  <PaginationItem key={number}>
+                    <PaginationLink
+                      onClick={() => paginate(number)}
+                      isActive={currentPage === number}
+                    >
+                      {number}
+                    </PaginationLink>
+                  </PaginationItem>
+                )
+              ))}
+              
+              <PaginationItem>
+                <PaginationNext 
+                  onClick={() => paginate(currentPage + 1)} 
+                  className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  aria-disabled={currentPage === totalPages}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
         </div>
       )}
     </div>

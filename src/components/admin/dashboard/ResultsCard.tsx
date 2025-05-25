@@ -65,15 +65,12 @@ const ResultsCard: FC<ResultsCardProps> = ({
         isFilterActive={isFilterActive}
       />
 
-      {/* Sort Indicator */}
-      <SortIndicator 
-        sortConfig={sortConfig}
-        resetSort={onResetSort}
-      />
-
       <CardContent>
-        {/* Export Buttons */}
-        <ExportButtons testResults={testResults} />
+        {/* Sort Indicator */}
+        <SortIndicator 
+          sortConfig={sortConfig}
+          resetSort={onResetSort}
+        />
         
         {/* Results Table */}
         <ResultsTable 
@@ -86,6 +83,11 @@ const ResultsCard: FC<ResultsCardProps> = ({
           isLoading={isLoading}
           onRetry={onRetry}
         />
+        
+        {/* Export Buttons - Moved below table */}
+        <div className="mt-6 pt-3 border-t">
+          <ExportButtons testResults={testResults} />
+        </div>
       </CardContent>
     </Card>
   );
