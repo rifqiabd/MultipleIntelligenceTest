@@ -2,8 +2,53 @@ import { supabase } from './client';
 import { Question } from '@/data/testQuestions';
 import { ApiError } from './api';
 
-// Table name for questions
-const QUESTIONS_TABLE = 'table_questions';
+// Table name for questions - must match the name in questions_setup.sql
+const QUESTIONS_TABLE = 'test_questions';
+
+/**
+ * Try fetching questions from different possible table names
+ * @returns Promise with data from the first successful table query
+ */
+async function tryFetchFromPossibleTables() {
+  // Table names to try, in priority order
+  const possibleTables = [
+    QUESTIONS_TABLE,        // The main table name (now 'test_questions')
+    'table_questions',      // Legacy name that might be used
+    'questions'             // Simple name that might be used
+  ];
+  
+  let lastError = null;
+  
+  // Try each table name until one works
+  for (const tableName of possibleTables) {
+    try {
+      console.log(`Attempting to fetch questions from table: ${tableName}`);
+      const { data, error } = await supabase
+        .from(tableName)
+        .select('*')
+        .order('type')
+        .order('id');
+        
+      if (error) {
+        console.warn(`Could not fetch from ${tableName}:`, error);
+        lastError = error;
+        continue; // Try next table
+      }
+      
+      console.log(`Success! Found ${data?.length || 0} questions in table '${tableName}'`);
+      return { data, tableName };
+    } catch (err) {
+      console.warn(`Error with table ${tableName}:`, err);
+      lastError = err;
+    }
+  }
+  
+  // If we get here, all attempts failed
+  throw new ApiError(
+    `Failed to fetch questions from any known table name. Last error: ${lastError?.message || 'Unknown'}`,
+    lastError?.code || 'MULTIPLE_TABLE_FAILURE'
+  );
+}
 
 /**
  * Get all questions
@@ -11,19 +56,12 @@ const QUESTIONS_TABLE = 'table_questions';
  */
 export async function getAllQuestions() {
   try {
-    console.log('Fetching questions from Supabase table:', QUESTIONS_TABLE);
-    const { data, error } = await supabase
-      .from(QUESTIONS_TABLE)
-      .select('*')
-      .order('type')
-      .order('id');
-
-    if (error) {
-      console.error('Supabase error when fetching questions:', error);
-      throw new ApiError(error.message, error.code);
-    }
+    console.log('Fetching questions from Supabase...');
     
-    console.log(`Received ${data?.length || 0} questions from Supabase`);
+    // Try to get data from any available table
+    const { data, tableName } = await tryFetchFromPossibleTables();
+    
+    console.log(`Successfully retrieved ${data?.length || 0} questions from table '${tableName}'`);
     
     // Validate that the data has the correct structure
     if (data && Array.isArray(data)) {
@@ -46,10 +84,37 @@ export async function getAllQuestions() {
     }
   } catch (error) {
     console.error('Error fetching questions:', error);
-    return { 
-      success: false, 
-      error
-    };
+    
+    // Log raw response for debugging
+    console.log('Raw response from getAllQuestions:', { success: false, error });
+    
+    // If we failed to get questions from Supabase, fall back to static questions
+    // This ensures the app will work even if database connection fails
+    try {
+      console.log('Falling back to static questions from testQuestions.ts');
+      
+      // Import static questions from the data file
+      const { questions } = await import('@/data/testQuestions');
+      
+      if (questions && Array.isArray(questions) && questions.length > 0) {
+        console.log(`Loaded ${questions.length} static questions as fallback`);
+        return {
+          success: true,
+          data: questions,
+          source: 'static' // Flag to indicate these came from static data
+        };
+      } else {
+        console.error('No valid data returned from getAllQuestions');
+        return { success: false, error, data: [] };
+      }
+    } catch (fallbackError) {
+      console.error('Failed to load static questions fallback:', fallbackError);
+      return { 
+        success: false, 
+        error,
+        fallbackError
+      };
+    }
   }
 }
 
@@ -60,18 +125,39 @@ export async function getAllQuestions() {
  */
 export async function getQuestionsByType(type: string) {
   try {
-    const { data, error } = await supabase
-      .from(QUESTIONS_TABLE)
-      .select('*')
-      .eq('type', type)
-      .order('id');
+    // Try to fetch using the main table first
+    try {
+      const { data, error } = await supabase
+        .from(QUESTIONS_TABLE)
+        .select('*')
+        .eq('type', type)
+        .order('id');
 
-    if (error) throw new ApiError(error.message, error.code);
-    
-    return { 
-      success: true, 
-      data: data as Question[] 
-    };
+      if (error) throw new ApiError(error.message, error.code);
+      
+      return { 
+        success: true, 
+        data: data as Question[] 
+      };
+    } catch (tableError) {
+      // If main table fails, try the alternative tables
+      console.log(`Failed to get ${type} questions from ${QUESTIONS_TABLE}, trying alternatives`);
+      
+      // Try to get all questions and filter by type
+      const allQuestionsResult = await getAllQuestions();
+      
+      if (allQuestionsResult.success && allQuestionsResult.data) {
+        const filteredQuestions = allQuestionsResult.data.filter(q => q.type === type);
+        console.log(`Filtered ${filteredQuestions.length} questions of type ${type}`);
+        
+        return {
+          success: true,
+          data: filteredQuestions
+        };
+      } else {
+        throw tableError; // Re-throw the original error
+      }
+    }
   } catch (error) {
     console.error(`Error fetching ${type} questions:`, error);
     return { 
@@ -88,6 +174,7 @@ export async function getQuestionsByType(type: string) {
  */
 export async function addQuestion(question: Question) {
   try {
+    console.log(`Adding new question to table ${QUESTIONS_TABLE}:`, question.id);
     const { data, error } = await supabase
       .from(QUESTIONS_TABLE)
       .insert(question)
@@ -95,6 +182,7 @@ export async function addQuestion(question: Question) {
 
     if (error) throw new ApiError(error.message, error.code);
     
+    console.log(`Successfully added question ${question.id}`);
     return { 
       success: true, 
       data: data[0] as Question 
