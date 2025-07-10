@@ -11,6 +11,9 @@ const Index = () => {
   const [mobileNav, setMobileNav] = useState(false);
   // Untuk mendeteksi kode rahasia
   const [secretCode, setSecretCode] = useState<string[]>([]);
+  // Untuk mobile easter egg
+  const [tapCount, setTapCount] = useState(0);
+  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const onScroll = () => {
@@ -22,7 +25,7 @@ const Index = () => {
     const handleKeyDown = (e: KeyboardEvent) => {
       setSecretCode((prev) => {
         const updatedCode = [...prev, e.key].slice(-5);
-        
+
         // Cek jika kode adalah "sayang"
         if (updatedCode.join("").toLowerCase() === "sayang") {
           navigate("/makasihya");
@@ -30,14 +33,46 @@ const Index = () => {
         return updatedCode;
       });
     };
-    
+
     window.addEventListener("keydown", handleKeyDown);
-    
+
     return () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
+
+  // Handle triple tap pada logo (mobile easter egg)
+  const handleLogoTap = () => {
+    setTapCount(prev => prev + 1);
+
+    // Reset counter setelah 1 detik jika tidak mencapai 3 tap
+    setTimeout(() => {
+      setTapCount(0);
+    }, 1000);
+
+    // Jika sudah 3 tap, navigate ke makasihya
+    if (tapCount === 2) { // karena ini tap ke-3
+      navigate("/makasihya");
+      setTapCount(0);
+    }
+  };
+
+  // Handle long press pada footer (mobile easter egg)
+  const handleFooterTouchStart = () => {
+    const timer = setTimeout(() => {
+      navigate("/makasihya");
+    }, 2000); // 2 detik long press
+
+    setLongPressTimer(timer);
+  };
+
+  const handleFooterTouchEnd = () => {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
+    }
+  };
 
   // HERO SECTION
   // Features/benefits for cards
@@ -82,13 +117,16 @@ const Index = () => {
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
       {/* MARKETING STYLE HEADER */}
       <header
-        className={`w-full fixed top-0 left-0 z-40 transition-all duration-300 ${
-          scrolled ? "bg-white/90 shadow-md backdrop-blur-md" : "bg-transparent"
-        }`}
+        className={`w-full fixed top-0 left-0 z-40 transition-all duration-300 ${scrolled ? "bg-white/90 shadow-md backdrop-blur-md" : "bg-transparent"
+          }`}
       >
         <div className="max-w-6xl mx-auto flex items-center justify-between px-4 md:px-4 py-4">
           {/* Logo */}
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}> 
+          <div
+            className="flex items-center gap-2 cursor-pointer select-none"
+            onClick={() => navigate("/")}
+            onTouchEnd={handleLogoTap} // Triple tap easter egg untuk mobile
+          >
             <span className="bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center text-white text-sm font-black md:text-xl shadow-md px-4 py-1">Multiple Intelegences Test</span>
           </div>
           {/* Desktop Nav */}
@@ -280,7 +318,14 @@ const Index = () => {
       {/* FOOTER */}
       <footer className="w-full text-center text-xs text-gray-500 py-8 border-t border-gray-200 mt-auto bg-white/70">
         <div>© {new Date().getFullYear()} Made with 💖 in PPTQA | Tes Kecerdasan Majemuk Berdasarkan teori Howard Gardner</div>
-        <div className="mt-1">Created for Dewi Sinta</div>
+        <div
+          className="mt-1 select-none"
+          onTouchStart={handleFooterTouchStart}
+          onTouchEnd={handleFooterTouchEnd}
+          onMouseLeave={handleFooterTouchEnd} // Untuk desktop jika accidentally hover
+        >
+          Created for Dewi Sinta
+        </div>
       </footer>
     </div>
   );
