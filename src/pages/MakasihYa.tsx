@@ -62,7 +62,7 @@ const MakasihYa = () => {
             </p>
 
             <p className="text-sm sm:text-base md:text-lg">
-              Aplikasi ini ku persembahkan untukmu sebagai bentuk dukungan untuk sidang skripsimu. Walaupun ya akhirnya nggak kepake juga 😬.
+              Aplikasi ini ku persembahkan untukmu sebagai bentuk dukungan untuk sidang skripsimu.
               Semua fitur yang ada di sini dibangun dengan harapan dapat membantu
               memudahkan penelitianmu. Ini adalah caraku mendukung kesuksesanmu.
             </p>

@@ -14,6 +14,8 @@ const Index = () => {
   // Untuk mobile easter egg
   const [tapCount, setTapCount] = useState(0);
   const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
+  // Untuk animasi transisi
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   useEffect(() => {
     const onScroll = () => {
@@ -28,7 +30,7 @@ const Index = () => {
 
         // Cek jika kode adalah "sayang"
         if (updatedCode.join("").toLowerCase() === "sayang") {
-          navigate("/makasihya");
+          navigateToMakasihya();
         }
         return updatedCode;
       });
@@ -42,6 +44,16 @@ const Index = () => {
     };
   }, []);
 
+  // Fungsi untuk navigasi dengan animasi transisi
+  const navigateToMakasihya = () => {
+    setIsTransitioning(true);
+    
+    // Tunggu animasi fade out selesai, lalu navigate
+    setTimeout(() => {
+      navigate("/makasihya");
+    }, 500); // 500ms untuk animasi fade out
+  };
+
   // Handle triple tap pada logo (mobile easter egg)
   const handleLogoTap = () => {
     setTapCount(prev => prev + 1);
@@ -53,7 +65,7 @@ const Index = () => {
 
     // Jika sudah 3 tap, navigate ke makasihya
     if (tapCount === 2) { // karena ini tap ke-3
-      navigate("/makasihya");
+      navigateToMakasihya();
       setTapCount(0);
     }
   };
@@ -61,7 +73,7 @@ const Index = () => {
   // Handle long press pada footer (mobile easter egg)
   const handleFooterTouchStart = () => {
     const timer = setTimeout(() => {
-      navigate("/makasihya");
+      navigateToMakasihya();
     }, 2000); // 2 detik long press
 
     setLongPressTimer(timer);
@@ -115,6 +127,26 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
+      {/* Overlay untuk animasi transisi */}
+      {isTransitioning && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="fixed inset-0 bg-gradient-to-br from-purple-600 via-indigo-600 to-pink-600 z-50 flex items-center justify-center"
+        >
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.3 }}
+            className="text-white text-center"
+          >
+            <div className="text-6xl mb-4">💝</div>
+            <div className="text-2xl font-bold">Menuju halaman khusus...</div>
+          </motion.div>
+        </motion.div>
+      )}
+
       {/* MARKETING STYLE HEADER */}
       <header
         className={`w-full fixed top-0 left-0 z-40 transition-all duration-300 ${scrolled ? "bg-white/90 shadow-md backdrop-blur-md" : "bg-transparent"
