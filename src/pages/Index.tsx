@@ -47,7 +47,7 @@ const Index = () => {
   // Fungsi untuk navigasi dengan animasi transisi
   const navigateToMakasihya = () => {
     setIsTransitioning(true);
-    
+
     // Tunggu animasi fade out selesai, lalu navigate
     setTimeout(() => {
       navigate("/makasihya");
@@ -133,16 +133,19 @@ const Index = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="fixed inset-0 bg-gradient-to-br from-purple-600 via-indigo-600 to-pink-600 z-50 flex items-center justify-center"
+          className="fixed inset-0 bg-gradient-to-br from-indigo-100 via-purple-200 to-pink-200 z-50 flex items-center justify-center"
+          style={{
+            background: 'linear-gradient(135deg, #e0e7ff 0%, #ddd6fe 25%, #c4b5fd 50%, #a78bfa 75%, #fce7f3 100%)'
+          }}
         >
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.3 }}
-            className="text-white text-center"
+            className="text-purple-800 text-center"
           >
-            <div className="text-6xl mb-4">💝</div>
-            <div className="text-2xl font-bold">Menuju halaman khusus...</div>
+            {/* <div className="text-6xl mb-4">💝</div> */}
+            <div className="text-2xl font-bold drop-shadow-sm">Menuju halaman khusus...</div>
           </motion.div>
         </motion.div>
       )}
